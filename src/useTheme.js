@@ -1,24 +1,26 @@
 import { useState, useEffect } from 'react';
 
 export function useTheme() {
-  const [theme, setTheme] = useState('light-theme');
+  const [theme, setTheme] = useState(
+    localStorage.getItem('theme') || 'light-theme'
+  );
 
+  // Единая точка управления классами
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'light-theme';
-    setTheme(savedTheme);
-    document.body.classList.add(savedTheme);
-  }, []);
+    const body = document.body;
 
+    body.classList.remove('light-theme', 'dark-theme');
+    body.classList.add(theme);
+
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  // Если вдруг понадобится вручную
   const toggleTheme = () => {
-    const newTheme = theme === 'light-theme' ? 'dark-theme' : 'light-theme';
-    setTheme(newTheme);
-
-    // Удаляем старый класс, добавляем новый
-    document.body.classList.remove('light-theme', 'dark-theme');
-    document.body.classList.add(newTheme);
-
-    localStorage.setItem('theme', newTheme);
+    setTheme(prev =>
+      prev === 'light-theme' ? 'dark-theme' : 'light-theme'
+    );
   };
 
-  return { theme, toggleTheme };
+  return { theme, setTheme, toggleTheme };
 }

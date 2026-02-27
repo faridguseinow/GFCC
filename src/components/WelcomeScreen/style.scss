@@ -1,0 +1,107 @@
+.welcome-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.welcome-overlay.fade-out {
+  animation: fadeOut 0.5s ease forwards;
+}
+
+.welcome-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  padding: 30px 20px;
+  max-width: 320px;
+  min-height: 400px;
+
+  img {
+    width: 110px;
+    border-radius: 28px;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-size: 24px;
+    font-family: var(--f-bold);
+  }
+
+  .slide-text {
+    font-size: 16px;
+    opacity: 0.8;
+    margin-bottom: 16px;
+    line-height: 1.4;
+  }
+
+  .random-msg {
+    font-size: 14px;
+    color: var(--color-primary);
+    margin-bottom: 20px;
+  }
+
+  button {
+    background: var(--color-primary);
+    color: var(--bg-color);
+    border: none;
+    padding: 12px 20px;
+    border-radius: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+
+    &:active {
+      transform: scale(0.96);
+    }
+  }
+}
+
+/* Индикатор */
+
+.progress-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+
+  span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--shadow);
+    transition: 0.3s ease;
+  }
+
+  .active {
+    width: 20px;
+    border-radius: 10px;
+    background: var(--color-primary);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}

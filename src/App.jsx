@@ -8,19 +8,30 @@ import {
 
 import { useEffect, useState } from 'react';
 import { AliveScope, KeepAlive } from 'react-activation';
+import { CartProvider } from "./context/CartContext";
+import { ToastProvider } from "./context/ToastContext";
 
 import './App.scss';
 import './reset.css';
 
+import WelcomeScreen from './components/WelcomeScreen'
+import PWAInstallBanner from './components/PWAInstallBanner'
+
 import Home from './pages/Home';
+
 import Contacts from './pages/Contacts';
+import ContactsGolden from './pages/Contacts/ContactsGolden';
+import ContactsOasis from './pages/Contacts/ContactsOasis';
+
 import Price from './pages/Price';
+
+import Cart from './pages/Cart';
+
 import Others from './pages/Others';
+import ConverterPage from './pages/Others/ConverterPage';
+import FAQPage from './pages/Others/FAQPage';
 
-import Header from './layouts/Header';
 import Footer from './layouts/Footer';
-
-import InstallMobileIcon from '@mui/icons-material/InstallMobile';
 
 // ———————————————
 // Scroll Restoration (всё кроме /price)
@@ -37,79 +48,112 @@ function ScrollHandler() {
 }
 
 // ———————————————
-// Установка PWA + --vh обновление
-function SetupHandlers() {
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [showInstall, setShowInstall] = useState(false);
-
-  useEffect(() => {
-    const updateVH = () => {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-    };
-
-    updateVH();
-    window.addEventListener('resize', updateVH);
-
-    return () => window.removeEventListener('resize', updateVH);
-  }, []);
-
-  useEffect(() => {
-    const handler = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setShowInstall(true);
-    };
-
-    window.addEventListener('beforeinstallprompt', handler);
-
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
-
-  const handleInstall = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      console.log('✅ PWA установлено');
-    }
-    setDeferredPrompt(null);
-    setShowInstall(false);
-  };
-
-  return (
-    showInstall && (
-      <button className="install-btn" onClick={handleInstall}>
-        <InstallMobileIcon />Установить приложение
-      </button>
-    )
-  );
-}
-
-// ———————————————
 // Основной компонент
 function App() {
+  const [welcomeVisible, setWelcomeVisible] = useState(true);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  useEffect(() => {
+    const standalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true;
+
+    setIsInstalled(standalone);
+  }, []);
+
   return (
-    <Router>
-      <AliveScope>
-        <ScrollHandler />
-        <SetupHandlers />
+    <div className="app-container">
+      <CartProvider>
+        <ToastProvider>
+          <Router>
 
-        <div id="background-layer"></div>
-        <Header />
+            {welcomeVisible && (
+              <WelcomeScreen onFinish={() => setWelcomeVisible(false)} />
+            )}
 
-        <Routes>
-          <Route path="/" element={<KeepAlive><Home /></KeepAlive>} />
-          <Route path="/contacts" element={<KeepAlive><Contacts /></KeepAlive>} />
-          <Route path="/price" element={<KeepAlive><Price /></KeepAlive>} />
-          <Route path="/others" element={<KeepAlive><Others /></KeepAlive>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            {!welcomeVisible && !isInstalled && (
+              <PWAInstallBanner />
+            )}
 
-        <Footer />
-      </AliveScope>
-    </Router>
+            <ScrollHandler />
+
+            <AliveScope>
+              <Routes>
+
+                <Route
+                  path="/"
+                  element={
+                    <KeepAlive cacheKey="home">
+                      <Home />
+                    </KeepAlive>
+                  }
+                />
+
+                <Route
+                  path="/contacts"
+                  element={
+                    <KeepAlive cacheKey="contacts">
+                      <Contacts />
+                    </KeepAlive>
+                  }
+                />
+
+                <Route
+                  path="/contacts/golden"
+                  element={
+                    <KeepAlive cacheKey="contacts">
+                      <ContactsGolden />
+                    </KeepAlive>
+                  }
+                />
+
+                <Route
+                  path="/contacts/oasis"
+                  element={
+                    <KeepAlive cacheKey="contacts">
+                      <ContactsOasis />
+                    </KeepAlive>
+                  }
+                />
+
+                <Route
+                  path="/price"
+                  element={
+                    <KeepAlive cacheKey="price">
+                      <Price />
+                    </KeepAlive>
+                  }
+                />
+
+                <Route
+                  path="/cart"
+                  element={<Cart />}
+                />
+
+                <Route
+                  path="/others"
+                  element={
+                    <Others />
+                  }
+                />
+
+                <Route path="/others/converter" element={<ConverterPage />} />
+                <Route path="/others/faq" element={<FAQPage />} />
+
+
+                <Route path="*" element={<Navigate to="/" replace />} />
+
+              </Routes>
+            </AliveScope>
+
+            <Footer />
+
+          </Router>
+        </ToastProvider>
+      </CartProvider>
+    </div>
   );
 }
+
 
 export default App;

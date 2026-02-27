@@ -1,311 +1,107 @@
-import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTheme } from '/src/useTheme.js';
 import './style.scss';
-import { Link } from 'react-router-dom';
+
+import Oasis from '../../assets/icons/oasis_logo.svg'
+
+import LogoSM from '/src/assets/icons/logo_sm.svg';
+import LogoTB from '/src/assets/icons/logo_text_black.svg';
+import LogoTW from '/src/assets/icons/logo_text.svg';
 
 import TGimg from '/src/assets/icons/social/icons8-telegram.svg';
 import VKimg from '/src/assets/icons/social/icons8-vk.svg';
 import Insimg from '/src/assets/icons/social/icons8-instagram.svg';
 import YTimg from '/src/assets/icons/social/icons8-youtube.svg';
 
-//import images
-import Num1 from '/src/assets/icons/logo_sm.svg'
-import Num2 from '/src/assets/icons/flowers_icons/chrysanthemum.png'
-import Num357 from '/src/assets/icons/flowers_icons/rose.png'
-import Num4 from '/src/assets/icons/flowers_icons/exotic.png'
-import Num6 from '/src/assets/icons/flowers_icons/domestic.png'
-import Num8 from '/src/assets/icons/flowers_icons/packaging.png'
-import Num9 from '/src/assets/icons/flowers_icons/kitay.png'
-import Num10 from '/src/assets/icons/flowers_icons/suxocvet.png'
+export default function ContactsPage() {
+  const navigate = useNavigate();
 
+  const { theme, toggleTheme } = useTheme();
+  const logoText = theme === 'dark-theme' ? LogoTW : LogoTB;
 
-export default function index() {
   return (
-    <div className="numbers_container">
-      <h2>Контакты</h2>
+    <div className="contacts-menu">
 
-      <div className="number_container_inner">
-
-        <div className="num_section head glass">
-
-          <div className="num_sec_top">
-
-            <img src={Num1} width={35} />
-            <p>Главный офис</p>
-          </div>
-
-          <div className="num_sec_bottom">
-
-            <div className="bottom_nums">
-              <a href='tel:84957818888'>8 (495) 781 88 88</a>
-            </div>
-
-          </div>
-
+      {/* Golden */}
+      <div
+        className="menu-card glass"
+        onClick={() => navigate('/contacts/golden')}
+      >
+        <div className="gfcc-logo">
+          <img src={LogoSM} width={45} alt="" />
+          <img src={logoText} width={140} alt="" />
         </div>
 
-        <div className="num_section xrizant glass">
-
-          <div className="num_sec_top">
-            <img src={Num2} width={30} />
-            <p>Хризантема и Зелень</p>
-          </div>
-
-          <div className="num_sec_bottom">
-
-            <div className="bottom_nums num1">
-
-              <a href='tel:89251665204'>8 (925) 166 52 04</a>
-
-            </div>
-          </div>
-        </div>
-
-        <div className="num_section plant glass">
-
-          <div className="num_sec_top">
-            <img src={Num6} width={35} />
-            <p>Комнатные растения</p>
-          </div>
-
-          <div className="num_sec_bottom">
-
-            <div className="bottom_nums num1">
-
-              <a href='tel:89266355181'>8 (926) 635 51 81</a>
-              <a className="telegram_icon" href='https://t.me/+79266355181' target='_blank'>
-                <img src={TGimg} width={35} />
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div className="num_section exotics glass">
-
-          <div className="num_sec_top">
-            <img src={Num4} width={35} />
-            <p>Экзотические цветы</p>
-          </div>
-
-          <div className="num_sec_bottom">
-
-            <div className="bottom_nums num1">
-
-              <a href='tel:89645117113'>8 (964) 511 71 13</a>
-              <a className="telegram_icon" href='https://t.me/+79645117113' target='_blank'>
-                <img src={TGimg} width={35} />
-              </a>
-            </div>
-
-            <div className="bottom_nums num2">
-
-              <a href='tel:89092868188'>8 (903) 286 81 88</a>
-              <a className="telegram_icon" href='https://t.me/+79092868188' target='_blank'>
-                <img src={TGimg} width={35} />
-              </a>
-            </div>
-
-
-
-          </div>
-
-        </div>
-
-        <div className="num_section kitay glass">
-
-          <div className="num_sec_top">
-            <img src={Num9} width={35} />
-            <p>Цветы из Китая</p>
-          </div>
-
-          <div className="num_sec_bottom">
-
-            <div className="bottom_nums num1">
-
-              <a href='tel:89647818887'>8 (964) 781 88 87</a>
-              <a className="telegram_icon" href='https://t.me/+79647818887' target='_blank'>
-                <img src={TGimg} width={35} />
-              </a>
-            </div>
-
-          </div>
-
-        </div>
-
-        <div className="num_section suxocvet glass">
-
-          <div className="num_sec_top">
-            <img src={Num10} width={35} />
-            <p>Сухоцветы</p>
-          </div>
-
-          <div className="num_sec_bottom">
-
-            <div className="bottom_nums num1">
-
-              <a href='tel:89998382889'>8 (999) 838 28 89</a>
-              <a className="telegram_icon" href='https://t.me/+79998382889' target='_blank'>
-                <img src={TGimg} width={35} />
-              </a>
-            </div>
-
-          </div>
-
-        </div>
-
-        <div className="num_section rosekenya glass">
-
-          <div className="num_sec_top">
-            <img src={Num357} width={35} />
-            <p>Розы из Кении</p>
-          </div>
-
-          <div className="num_sec_bottom">
-
-            <div className="bottom_nums num1">
-
-              <a href='tel:89254533969'>8 (925) 453 39 69</a>
-              <a className="telegram_icon" href='https://t.me/+79254533969' target='_blank'>
-                <img src={TGimg} width={35} />
-              </a>
-            </div>
-
-            <div className="bottom_nums num2">
-
-              <a href='tel:89652398588'>8 (965) 239 85 88</a>
-              <a className="telegram_icon" href='https://t.me/+79652398588' target='_blank'>
-                <img src={TGimg} width={35} />
-              </a>
-            </div>
-
-
-
-          </div>
-
-        </div>
-
-        <div className="num_section roseecuador glass">
-
-          <div className="num_sec_top">
-            <img src={Num357} width={35} />
-            <p>Розы из Эквадора</p>
-          </div>
-
-          <div className="num_sec_bottom">
-
-            <div className="bottom_nums num1">
-
-              <a href='tel:89672921155'>8 (967) 292 11 55</a>
-              <a className="telegram_icon" href='https://t.me/+79672921155' target='_blank'>
-                <img src={TGimg} width={35} />
-              </a>
-
-            </div>
-
-            <div className="bottom_nums num2">
-
-              <a href='tel:89096988188'>8 (909) 698 81 88</a>
-              <a className="telegram_icon" href='https://t.me/+79096988188' target='_blank'>
-                <img src={TGimg} width={35} />
-              </a>
-            </div>
-
-
-
-          </div>
-
-        </div>
-
-        <div className="num_section rosewater glass">
-
-          <div className="num_sec_top">
-            <img src={Num357} width={35} />
-            <p>Розы на воде</p>
-          </div>
-
-          <div className="num_sec_bottom">
-
-            <div className="bottom_nums num1">
-
-              <a href='tel:89060280248'>8 (906) 028 02 48</a>
-              <a className="telegram_icon" href='https://t.me/+79060280248' target='_blank'>
-                <img src={TGimg} width={35} />
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div className="num_section upakovka glass">
-
-          <div className="num_sec_top">
-            <img src={Num8} width={35} />
-            <p>Упаковка</p>
-          </div>
-
-          <div className="num_sec_bottom">
-
-            <div className="bottom_nums num1">
-
-              <a href='tel:89654118885'>8 (965) 411 88 85</a>
-              <a className="telegram_icon" href='https://t.me/+79654118885' target='_blank'>
-                <img src={TGimg} width={35} />
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div className="num_section delivery glass">
-
-          <div className="num_sec_top">
-            <img src={Num1} width={35} />
-            <p>Сбор заказов</p>
-          </div>
-
-          <div className="num_sec_bottom">
-
-            <div className="bottom_nums num1">
-
-              <a href='tel:89637818889'>8 (963) 781 88 89</a>
-              <a className="telegram_icon" href='https://t.me/+79637818889' target='_blank'>
-                <img src={TGimg} width={35} />
-              </a>
-            </div>
-          </div>
-        </div>
+        <p>Отделы и телефоны</p>
       </div>
 
-      <div className="map glass">
-        <div className="map_text">
-          <h1>Адрес</h1>
-          <p>Московская область, Ленинский район, деревня Апаринки, владение 9, строение 1, помещение 3</p>
-          <a href="https://yandex.ru/maps/-/CDcqbS7~" target='_blank'>
-            <p>Перейти в <span>Я</span>ндекс карты</p>
+      {/* Oasis */}
+      <div
+        className="menu-card glass"
+        onClick={() => navigate('/contacts/oasis')}
+      >
+        <img src={Oasis} width={140} alt="" />
+        <p>Отделы и телефоны</p>
+      </div>
+
+      {/* Соцсети Golden */}
+      <div className="menu-card glass social-card">
+        <h3>Golden Flowers</h3>
+
+        <div className="social-icons">
+          <a href="https://www.instagram.com/gfccru" target="_blank">
+            <img src={Insimg} alt="instagram" />
+          </a>
+          <a href="https://t.me/GoldenFlowersOpt" target="_blank">
+            <img src={TGimg} alt="telegram" />
+          </a>
+          <a href="https://vk.com/gfccru" target="_blank">
+            <img src={VKimg} alt="vk" />
+          </a>
+          <a href="https://www.youtube.com/@gfccru" target="_blank">
+            <img src={YTimg} alt="youtube" />
           </a>
         </div>
 
-      </div>
-
-      <div className="social">
-        <h2>Социальные сети</h2>
-        <div className="social_media_container">
-          <Link className="glass" to={'https://www.instagram.com/gfccru'} target={'_blank'}>
-            <img src={Insimg} alt="instagram" /> </Link>
-          <Link className="glass" to={'https://t.me/GoldenFlowersOpt'} target='_blank'>
-            <img src={TGimg} alt="telegram" /> </Link>
-          <Link className="glass" to={'https://vk.com/gfccru'} target='_blank'>
-            <img src={VKimg} alt="facebook" /> </Link>
-          <Link className="glass" to={'https://www.youtube.com/@gfccru'} target='_blank'>
-            <img src={YTimg} alt="youtube" /> </Link>
-        </div>
-
-        <div className="web_div">
-          <Link className="glass" to={'https://www.gfcc.ru'} target='_blank'>Вебсайт🌐 www.gfcc.ru</Link>
-          <Link className="glass" to={'mailto:info@gfcc.ru'} target='_blank'>Почта📧 info@gfcc.ru</Link>
+        <div className="links">
+          <a href="https://www.gfcc.ru" target="_blank">
+            www.gfcc.ru
+          </a>
+          <a href="mailto:info@gfcc.ru">
+            info@gfcc.ru
+          </a>
         </div>
       </div>
 
+      {/* Соцсети Oasis */}
+      <div className="menu-card glass social-card">
+        <h3>Oasis</h3>
 
+        <div className="social-icons">
+          <a href="https://www.instagram.com/oasis_flowers" target="_blank">
+            <img src={Insimg} alt="instagram" />
+          </a>
+          <a href="https://t.me/OasisFlowersOpt" target="_blank">
+            <img src={TGimg} alt="telegram" />
+          </a>
+          <a href="https://vk.com/oasisflowersopt" target="_blank">
+            <img src={VKimg} alt="vk" />
+          </a>
+          <a href="https://www.youtube.com/@oasisflowers4744" target="_blank">
+            <img src={YTimg} alt="youtube" />
+          </a>
+        </div>
 
-      <div className='author'>PWA by <Link to={'https://faridguseinow.framer.website/'} target='_blank'>Farid Huseynov</Link></div>
+        <div className="links">
+          <a href="https://www.oasisflowers.ru" target="_blank">
+            www.oasisflowers.ru
+          </a>
+          <a href="mailto:oasis@gfcc.ru">
+            oasis@gfcc.ru
+          </a>
+        </div>
+      </div>
+
     </div>
-  )
+  );
 }

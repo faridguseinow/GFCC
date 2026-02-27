@@ -1,29 +1,64 @@
-import React from 'react';
-import './style.scss';
-import FAQWrapper from '/src/components/FaqWrapper';
-import Converter from "/src/components/Converter";
+import { useNavigate } from "react-router-dom";
+import { useTheme } from "/src/useTheme";
+import NavListItem from "../../components/NavListItem";
+import "./style.scss";
 
-import ClientQR from '/src/components/ClientQR'; // добавь импорт
+export default function Others() {
+  const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
 
-export default function index() {
+  const toggleTheme = () => {
+    setTheme(
+      theme === "light-theme"
+        ? "dark-theme"
+        : "light-theme"
+    );
+  };
+
   return (
-    <div className='others_container'>
+    <div className="profile-page">
 
-      <div className="clientqr_wrapper">
-        <h1>QR клиента</h1>
-        <ClientQR />
-      </div>
-      
-      <div className="tools_wrapper">
-        <h1>Конвертер валют</h1>
-        <Converter />
-      </div>
+      {/* 🔷 PROFILE CARD */}
+      <div className="profile-card glass">
+        <div className="profile-avatar">
+          <img src="/default-avatar.png" alt="avatar" />
+        </div>
 
-      <div className="faq_wrapper">
-        <h1>Частые вопросы</h1>
-        <FAQWrapper />
+        <div className="profile-info">
+          <h3>Имя Фамилия</h3>
+          <p>ID клиента</p>
+        </div>
       </div>
 
+
+      {/* 🔷 ИНСТРУМЕНТЫ */}
+      <div className="section-title">Инструменты</div>
+
+      <NavListItem
+        title="Конвертер валют"
+        to="/others/converter"
+      />
+
+      <NavListItem
+        title="Частые вопросы"
+        to="/others/faq"
+      />
+
+      {/* 🔷 НАСТРОЙКИ */}
+      <div className="section-title">Настройки</div>
+
+      <div className="settings-item glass">
+        <span>Темная тема</span>
+
+        <div
+          className={`ios-switch ${
+            theme === "dark-theme" ? "active" : ""
+          }`}
+          onClick={toggleTheme}
+        >
+          <div className="switch-circle"></div>
+        </div>
+      </div>
 
     </div>
   );

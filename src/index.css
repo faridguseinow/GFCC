@@ -1,39 +1,57 @@
+/* темы */
+
+body.light-theme {
+  --bg-color: #ffffff;
+  --text: #000000;
+  --color-primary: #5e17eb;
+  --color-footer: #5e17eb1c;
+  --shadow: rgba(83, 83, 83, 0.194);
+  --glass-bg: rgb(255, 255, 255);
+  --icon-color: var(--color-primary);
+  --icon-bg: rgba(91, 23, 235, 0.12);
+}
+
+body.dark-theme {
+  --bg-color: #000000;
+  --text: #ffffff;
+  --color-primary: #ecbb47;
+  --color-footer: #ecba4725;
+  --shadow: rgba(48, 48, 48, 0.583);
+  --glass-bg: rgb(24, 24, 24);
+  --icon-color: var(--color-primary);
+  --icon-bg: rgba(236, 180, 71, 0.18);
+}
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
 
 body {
   margin: 0;
+  display: flex;
+  justify-content: center;
   min-width: 320px;
   min-height: 100vh;
-  background: var(--glass-bg, #fff);
-  color: var(--text, #000);
+  background: var(--bg-color);
+  color: var(--text);
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 
+a {
+  font-weight: 500;
+  color: var(--color-primary);
+  text-decoration: inherit;
+}
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+a:hover {
+  opacity: 0.8;
 }
 
 button {
@@ -43,39 +61,32 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  color: var(--text);
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: 0.25s ease;
 }
+
 button:hover {
-  border-color: #646cff;
+  opacity: 0.85;
 }
+
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: none;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+/* ===== Desktop container ===== */
+
+#root {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --glass-bg: #1a1a1a;
-    --text: #ffffff;
-    --glass-bg: #2b2b2b;
-    --border: #444;
-    --glass-bg-light: #2f2f2f;
-    --glass-bg-hover: #333333;
-    --color-primary: #646cff;
-  }
+.app-container {
+  width: 100%;
+  max-width: 768px;
+  min-height: 100vh;
+  background: var(--bg-color);
+  position: relative;
 }

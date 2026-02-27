@@ -1,0 +1,155 @@
+.cart-page {
+    padding: 16px;
+    padding-bottom: 150px;
+    max-width: 768px;
+    margin: 0 auto;
+
+    h1 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+        padding-bottom: 16px;
+    }
+
+    .no-orders {
+        text-align: center;
+        padding: 48px 0;
+        opacity: 0.6;
+    }
+
+    .active-order {
+        padding-top: 16px;
+
+        .cart-item {
+            padding: 14px;
+            margin-bottom: 10px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+
+            .item-top {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+
+                .remove {
+                    padding: 0;
+                    width: 36px;
+                    height: 28px;
+                    border-radius: 8px;
+                    background: var(--shadow);
+                    color: var(--text);
+                }
+            }
+
+            .item-bottom {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 8px;
+
+                .price {
+                    font-size: 12px;
+                    opacity: 0.6;
+                }
+
+                .qty {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 6px;
+
+                    button {
+                        padding: 0;
+                        width: 36px;
+                        height: 28px;
+                        border-radius: 8px;
+                        border: none;
+                        background: var(--icon-bg);
+                        color: var(--color-primary);
+                        cursor: pointer;
+                    }
+
+                    input {
+                        width: 50px;
+                        height: 28px;
+                        text-align: center;
+                        border-radius: 8px;
+                        border: 1px solid var(--icon-bg);
+                    }
+                }
+
+            }
+        }
+
+        .summary {
+            position: fixed;
+            bottom: 80px;
+            z-index: 99;
+            left: 0;
+            right: 0;
+            max-width: 768px;
+            margin: auto;
+            padding: 16px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+
+            button {
+                background: linear-gradient(135deg,
+                        var(--color-primary),
+                        #4b00c9);
+                color: white;
+                border: none;
+                padding: 10px 18px;
+                border-radius: 14px;
+            }
+        }
+
+    }
+
+    .history-section {
+        margin-top: 40px;
+
+        h2 {
+            opacity: 0.6;
+            padding-bottom: 16px;
+        }
+
+        .history-card {
+            padding: 16px;
+            margin-bottom: 16px;
+            border-radius: 16px;
+        }
+
+        .history-head {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 8px;
+
+            button {
+                flex: 1;
+                padding: 6px;
+                border-radius: 8px;
+                border: none;
+                background: var(--icon-bg);
+                color: var(--color-primary);
+            }
+
+            .danger {
+                background: rgba(255, 0, 0, 0.1);
+                color: red;
+            }
+        }
+
+    }
+
+}

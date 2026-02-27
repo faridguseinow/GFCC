@@ -1,136 +1,105 @@
-.pricelist_container {
-    padding: 125px 16px 85px;
+.price-page {
+  background: var(--bg-color);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  .categories-header {
+    padding: 24px 16px 12px;
+    background: var(--bg-color);
+
+    h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    p {
+      margin-top: 6px;
+      font-size: 13px;
+      opacity: 0.6;
+    }
+  }
+
+  .price-scroll-container {
+    flex: 1;
+    padding-bottom: 90px;
+  }
+
+
+  /* ===== Sticky Header ===== */
+
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg-color);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+    /* строка назад */
+
+    .header-top {
+      padding: 12px 16px 6px;
+    }
+
+  }
+
+
+  /* строка поиска */
+
+  .header-search {
+    padding: 6px 16px 10px;
+  }
+
+  .price-search {
+    width: 100%;
+    height: 40px;
+    border-radius: 12px;
+    border: none;
+    padding: 0 14px;
+    font-size: 14px;
+    background: var(--shadow);
+  }
+
+  /* ===== Товары ===== */
+
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg-color);
+    border-bottom: 1px solid var(--shadow);
+    padding: 10px 16px;
+  }
+
+  .header-row {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    font-family: var(--f-regular);
-    position: relative;
+    gap: 12px;
+  }
 
-    .header_search {
-        width: 100%;
-        max-width: 736px;
-        position: fixed;
-        top: 48px;
-        left: 0;
-        padding: 16px;
-        z-index: 99;
-        margin-top: 16px;
+  .price-back-btn {
+    padding: 0;
+    background: none;
+    border: none;
+    font-size: 15px;
+    color: var(--color-primary);
+    white-space: nowrap;
+  }
 
-        .titles {
-            width: 100%;
-            padding: 16px;
-            border-radius: 16px;
-            box-shadow: 0 2px 10px var(--shadow);
+  .price-search {
+    flex: 1;
+    height: 38px;
+    border-radius: 12px;
+    border: none;
+    padding: 0 14px;
+    font-size: 14px;
+    background: var(--shadow);
+  }
 
-            .title_left {
-                display: flex;
-                flex-direction: column;
-                gap: 12px;
-                text-align: center;
-
-                h1 {
-                    font-size: 24px;
-                    font-family: var(--f-bold);
-                }
-
-                .font-size-controls {
-                    display: flex;
-                    gap: 8px;
-                    align-items: center;
-                    justify-content: center;
-
-                    button {
-                        width: 56px;
-                        background: var(--glass-bg);
-                        border: 0 !important;
-                    }
-
-                    .filter-toggle {
-                        width: 150px;
-                        padding: 8px;
-                        margin-left: 16px;
-                    }
-
-
-                }
-
-                .search_input {
-
-                    input {
-                        background: var(--glass-bg);
-                        border: 0;
-                        width: 100%;
-                        height: 36px;
-                        border-radius: 8px;
-                        color: var(--text);
-                        font-size: 16px;
-                        padding: 16px;
-                        font-family: var(--f-regular);
-                    }
-                }
-            }
-        }
-
-        .categories {
-
-            .category_filter {
-                p {
-                    font-size: 24px;
-
-                }
-            }
-        }
-    }
-
-    .filter_panel {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        padding-top: 120px;
-        max-height: 0;
-        overflow: hidden;
-        transition: all 0.3s ease;
-        opacity: 0;
-        pointer-events: none;
-
-        &.open {
-            max-height: fit-content;
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        p {
-            font-size: 11px;
-        }
-
-        .category_filter {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-
-            h1 {
-                font-size: 24px;
-                font-family: var(--f-bold);
-            }
-
-            .category_list {
-
-                button {
-                    margin: 3px;
-                }
-            }
-        }
-    }
-
-    .googlesheets_container {
-        width: 100%;
-        padding-top: 120px;
-    }
 }
 
-button {
-    padding: 8px;
-    color: var(--text);
-    transition: all 0.3s ease;
-
+.price-loading {
+  text-align: center;
+  padding-top: 32px;
 }

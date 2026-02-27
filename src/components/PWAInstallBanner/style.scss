@@ -1,0 +1,48 @@
+.pwa-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 20px;
+
+  .pwa-card {
+    max-width: 380px;
+    width: 100%;
+    padding: 30px 24px;
+    border-radius: 28px;
+    text-align: center;
+
+    .pwa-logo {
+      width: 90px;
+      height: 90px;
+      border-radius: 22px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    ol {
+      text-align: left;
+      margin-bottom: 24px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 16px;
+      background: var(--color-primary);
+      border: none;
+      color: var(--glass-bg);
+      font-weight: 600;
+      cursor: pointer;
+    }
+  }
+}

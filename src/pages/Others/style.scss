@@ -1,47 +1,73 @@
-.others_container {
-    padding: 85px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+.profile-page {
+  padding: 16px;
+  padding-bottom: 100px;
+}
 
-    .clientqr_wrapper {
-        h1 {
-            font-size: 24px;
-            font-family: var(--f-bold);
-            font-weight: 600;
-            text-align: center;
-            color: var(--text);
-        }
-    }
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
 
-    .tools_wrapper {
-        width: 100%;
-        height: 100%;
+.profile-avatar img {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+}
 
+.profile-info h3 {
+  font-size: 18px;
+  font-weight: 600;
+}
 
-        h1 {
-            font-size: 24px;
-            font-family: var(--f-bold);
-            font-weight: 600;
-            text-align: center;
-            color: var(--text);
-        }
+.profile-info p {
+  font-size: 13px;
+  opacity: 0.6;
+}
 
-        .currency {
-            width: 100%;
-            height: 100%;
-        }
-    }
+.section-title {
+  font-size: 13px;
+  opacity: 0.5;
+  margin: 16px 0 8px;
+}
 
-    .faq_wrapper {
-        width: 100%;
+/* 🔷 iOS SWITCH */
 
-        h1 {
-            font-family: var(--f-bold);
-            color: var(--text);
-            font-size: 24px;
-            text-align: center;
-            line-height: 1.2;
-        }
-    }
+.settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+}
+
+.ios-switch {
+  width: 46px;
+  height: 26px;
+  background: #ccc;
+  border-radius: 20px;
+  position: relative;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.ios-switch.active {
+  background: var(--color-primary);
+}
+
+.switch-circle {
+  width: 22px;
+  height: 22px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: 0.3s;
+}
+
+.ios-switch.active .switch-circle {
+  left: 22px;
 }

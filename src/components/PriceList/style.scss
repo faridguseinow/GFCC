@@ -1,62 +1,54 @@
 .price-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  overflow-x: auto;
-}
-
-.price-loading {
-  padding: 1rem;
-  font-size: 14px;
-  color: var(--gray);
-}
-
-.price-category-block {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 24px;
-}
-
-.price-category-title {
-  font-size: 16px;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: var(--text);
+  background: var(--bg-color);
 }
 
 .price-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 16px;
+  background: var(--bg-color);
+}
 
-  th {
-    border-bottom: 1px solid var(--bg);
-    text-align: left;
-    padding: 6px;
-    font-weight: 600;
-    color: var(--text);
-  }
+.price-table th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-color);
+  padding: 10px 16px;
+  font-weight: 600;
+  text-align: left;
+  border-bottom: 1px solid var(--shadow);
+}
 
-  td {
-    padding: 6px;
-    border-collapse: collapse;
-    line-height: 1.3;
-  }
+.price-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--shadow);
+  text-align: left;
+}
 
-  tr {
-    border-bottom: 1px solid var(--bg);
-  }
+.price-table th:last-child {
+  text-align: right;
+  white-space: nowrap;
+}
 
-  // ✅ Названия товаров — перенос строки
-  td:first-child, th:first-child {
-    max-width: 200px;
-    white-space: normal;
-    word-break: break-word;
-  }
+.price-table tr:active {
+  background: var(--shadow);
+}
 
-  // ❌ Цены — не переносятся
-  td:not(:first-child), th:not(:first-child) {
-    white-space: nowrap;
-  }
+.price-table td:first-child {
+  white-space: normal;
+  word-break: break-word;
+}
+
+.price-table td:last-child {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.add-btn {
+  padding: 0;
+  width: 36px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: white;
 }

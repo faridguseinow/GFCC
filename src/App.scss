@@ -1,209 +1,122 @@
 :root {
-    --f-light: "Light";
-    --f-regular: "Regular";
-    --f-bold: "Bold";
-
-    --buttons: #777777;
-    --text: #000000;
-    --color-primary: #ecbb47;
-    --border: rgba(255, 255, 255, 0.295);
-    --shadow: rgba(0, 0, 0, 0.1);
-    --glass-bg: rgba(255, 255, 255, 0.295);
+  --f-light: "Light";
+  --f-regular: "Regular";
+  --f-bold: "Bold";
 }
 
-.dark-theme {
-    --buttons: #e6e6e6;
-    --text: #ffffff;
-    --color-primary: #ecbb47;
-    --border: rgba(155, 155, 155, 0.664);
-    --shadow: rgba(255, 255, 255, 0.062);
-    --glass-bg: rgba(56, 56, 56, 0.219);
-}
+/* шрифты */
 
-// ========== Fonts ==========
 @font-face {
-    font-family: 'Bold';
-    src: url('./assets/fonts/Onest-Bold.ttf') format("OpenType");
+  font-family: "Bold";
+  src: url("./assets/fonts/Onest-Bold.ttf") format("opentype");
 }
 
 @font-face {
-    font-family: 'Light';
-    src: url('./assets/fonts/Onest-Light.ttf') format("OpenType");
+  font-family: "Light";
+  src: url("./assets/fonts/Onest-Light.ttf") format("opentype");
 }
 
 @font-face {
-    font-family: 'Regular';
-    src: url('./assets/fonts/Onest-Regular.ttf') format("OpenType");
+  font-family: "Regular";
+  src: url("./assets/fonts/Onest-Regular.ttf") format("opentype");
 }
 
-// ========== Global ==========
+/* базовая структура */
+
 * {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-    scroll-behavior: smooth;
-    margin: 0;
+  box-sizing: border-box;
+  margin: 0;
 }
 
 html,
-body,
-#root {
-    width: 100%;
-    height: 100%;
-    font-family: var(--f-regular);
-    overflow-x: hidden;
-    overscroll-behavior: none;
-    background: none;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-
-    &::-webkit-scrollbar {
-        display: none;
-    }
-}
-
-html {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
 body {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    overscroll-behavior: none;
-    max-width: 768px;
+  height: 100%;
+  width: 100%;
+  font-family: var(--f-regular);
+  color: var(--text);
 }
 
-// ========== Glass ==========
-.glass {
-    position: relative;
-    border-radius: 16px;
-    overflow: hidden;
-    background: var(--glass-bg);
-    border: 1px solid var(--border);
-    box-shadow: 0 6px 20px var(--shadow);
-    transition: 0.4s ease;
-    z-index: 2;
-    backdrop-filter: blur(10px) saturate(180%);
-    -webkit-backdrop-filter: blur(10px) saturate(180%);
 
-    &::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        z-index: 0;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
-        pointer-events: none;
-    }
-
-    &::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: rgba(255, 255, 255, 0.05);
-        box-shadow:
-            inset 1px 1px 3px rgba(255, 255, 255, 0.3),
-            inset -1px -1px 5px rgba(0, 0, 0, 0.2);
-        pointer-events: none;
-        z-index: 0;
-    }
-
-    &>* {
-        position: relative;
-        z-index: 1;
-    }
-
-    &.light {
-        background: rgba(255, 255, 255, 0.25);
-        color: var(--text);
-    }
-
-    &.dark {
-        background: rgba(30, 30, 30, 0.2);
-        color: var(--text);
-    }
+input,
+textarea,
+select {
+  font-size: 16px !important;
 }
 
-// ========== Swiper ==========
-.slide_wrapper {
-    width: 100%;
-    height: 100%;
+// toast
 
-    .mySwiper {
-        width: 100%;
-        height: 100%;
-
-        .swiper-wrapper {
-            width: 100%;
-            height: 100%;
-
-            .swiper-slide {
-                width: 100%;
-                height: 100%;
-
-                .slider_item {
-                    width: 100%;
-                    height: 100%;
-                    aspect-ratio: 16 / 9;
-                    display: flex;
-                    justify-content: center;
-
-                    img {
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                    }
-
-                    h3 {
-                        color: var(--text);
-                        background: var(--glass-bg);
-                        backdrop-filter: blur(10px) saturate(180%);
-                        -webkit-backdrop-filter: blur(10px) saturate(180%);
-                        border-radius: 8px;
-                        margin: 8px;
-                        font-family: var(--f-bold);
-                        line-height: 1.2;
-                        font-size: 16px;
-                        text-align: center;
-                        position: absolute;
-                        padding: 8px;
-                    }
-                }
-            }
-        }
-    }
+.toast-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 9999;
 }
 
-// ========== Install Button ==========
-.install-btn {
-    width: 260px;
-    position: fixed;
-    bottom: calc(72px + env(safe-area-inset-bottom));
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--color-primary);
-    color: #000;
-    font-weight: 600;
-    border-radius: 12px;
-    padding: 8px 16px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    z-index: 999999;
+.toast {
+  margin-bottom: 100px;
+  padding: 10px 16px;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 400;
+  backdrop-filter: blur(20px);
+  background: var(--color-primary);
+  color: var(--glass-bg);
+  box-shadow: var(--shadow);
+  animation: toastIn 0.25s ease, toastOut 0.25s ease 1.75s forwards;
 }
 
-// ========== Background Fix ==========
-#background-layer {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-attachment: scroll;
-    transition: background-image 0.4s ease-in-out, opacity 0.3s ease;
+@keyframes toastIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
     opacity: 1;
-    pointer-events: none;
-    user-select: none;
+  }
+}
+
+@keyframes toastOut {
+  to {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+}
+
+/* glass */
+
+.glass {
+  position: relative;
+  border-radius: 16px;
+  background: var(--glass-bg);
+  box-shadow: 0 6px 20px var(--shadow);
+  transition: 0.3s ease;
+}
+
+.page-slide {
+  animation: slideInPage 0.35s ease forwards;
+}
+
+@keyframes slideInPage {
+  from {
+    transform: translateX(100%);
+    opacity: 0.6;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* mobile */
+
+@media (max-width: 768px) {
+  .export-btn {
+    display: none;
+  }
 }
