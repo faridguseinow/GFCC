@@ -36,6 +36,9 @@ body {
   color: var(--text);
 }
 
+p, span {
+  font-family: var(--f-regular) !important;
+}
 
 input,
 textarea,
@@ -46,22 +49,22 @@ select {
 // toast
 
 .toast-overlay {
+  max-width: 90%;
+  width: max-content;
+  text-align: center;
   position: fixed;
-  inset: 0;
+  bottom: calc(110px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translate(-50%, 0);
+  z-index: 999999;
   pointer-events: none;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  z-index: 9999;
 }
 
 .toast {
-  margin-bottom: 100px;
   padding: 10px 16px;
   border-radius: 16px;
   font-size: 16px;
-  font-weight: 400;
-  backdrop-filter: blur(20px);
+  font-weight: 500;
   background: var(--color-primary);
   color: var(--glass-bg);
   box-shadow: var(--shadow);

@@ -16,7 +16,7 @@ body.dark-theme {
   --text: #ffffff;
   --color-primary: #ecbb47;
   --color-footer: #ecba4725;
-  --shadow: rgba(48, 48, 48, 0.583);
+  --shadow: rgba(48, 48, 48, 0.405);
   --glass-bg: rgb(24, 24, 24);
   --icon-color: var(--color-primary);
   --icon-bg: rgba(236, 180, 71, 0.18);

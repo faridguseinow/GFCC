@@ -58,7 +58,7 @@ export default function PriceList({
           <tr>
             <th>Наименование</th>
             <th>Цена</th>
-            <th></th>
+            {/* <th></th> */}
           </tr>
         </thead>
 
@@ -69,7 +69,7 @@ export default function PriceList({
               <td>{format(item.extraPrice)}</td>
 
               {/* ✅ Кнопка внутри td */}
-              <td>
+              {/* <td>
                 <button
                   className="add-btn"
                   onClick={() => {
@@ -84,7 +84,7 @@ export default function PriceList({
                 >
                   +
                 </button>
-              </td>
+              </td> */}
 
             </tr>
           ))}

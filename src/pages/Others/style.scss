@@ -1,73 +1,143 @@
-.profile-page {
+.others-page {
   padding: 16px;
-  padding-bottom: 100px;
-}
-
-.profile-card {
+  padding-bottom: 120px;
   display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  margin-bottom: 24px;
-}
+  flex-direction: column;
+  gap: 28px;
 
-.profile-avatar img {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  object-fit: cover;
-}
+  .profile-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    border-radius: 24px;
 
-.profile-info h3 {
-  font-size: 18px;
-  font-weight: 600;
-}
+    .avatar-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
 
-.profile-info p {
-  font-size: 13px;
-  opacity: 0.6;
-}
+      label {
+        cursor: pointer;
+      }
 
-.section-title {
-  font-size: 13px;
-  opacity: 0.5;
-  margin: 16px 0 8px;
-}
+      img,
+      .avatar-fallback {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
 
-/* 🔷 iOS SWITCH */
+      .avatar-fallback {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--color-primary);
+        color: white;
+        font-weight: 600;
+        font-size: 20px;
+      }
 
-.settings-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 16px;
-}
+      .change-btn {
+        font-size: 11px;
+        background: none;
+        border: none;
+        color: var(--color-primary);
+        cursor: pointer;
+      }
+    }
 
-.ios-switch {
-  width: 46px;
-  height: 26px;
-  background: #ccc;
-  border-radius: 20px;
-  position: relative;
-  transition: 0.3s;
-  cursor: pointer;
-}
+    .profile-fields {
+      flex: 1;
 
-.ios-switch.active {
-  background: var(--color-primary);
-}
+      input {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 16px;
+        border: 1px solid rgba(0,0,0,0.08);
+        background: var(--bg-color);
+        font-size: 14px;
+        color: var(--text);
 
-.switch-circle {
-  width: 22px;
-  height: 22px;
-  background: white;
-  border-radius: 50%;
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  transition: 0.3s;
-}
+        &:focus {
+          border-color: var(--color-primary);
+        }
+      }
+    }
+  }
 
-.ios-switch.active .switch-circle {
-  left: 22px;
+  .section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .section-title {
+      font-size: 13px;
+      opacity: 0.5;
+      padding-left: 4px;
+    }
+
+    .settings-item {
+      padding: 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      &:active {
+        transform: scale(0.97);
+      }
+    }
+
+    .developer-link {
+      padding: 16px;
+      border-radius: 20px;
+      text-align: center;
+      text-decoration: none;
+      font-weight: 600;
+      color: var(--text);
+
+      &:active {
+        transform: scale(0.97);
+      }
+    }
+  }
+
+  .ios-switch {
+    width: 46px;
+    height: 26px;
+    background: #ccc;
+    border-radius: 20px;
+    position: relative;
+    transition: 0.3s;
+
+    &.active {
+      background: var(--color-primary);
+
+      .switch-circle {
+        left: 22px;
+      }
+    }
+
+    .switch-circle {
+      width: 22px;
+      height: 22px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: 0.3s;
+    }
+  }
+
+  .app-version {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 12px;
+    opacity: 0.5;
+  }
 }

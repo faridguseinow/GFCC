@@ -91,8 +91,10 @@ export default function Cart() {
 
             <button
               onClick={() => {
-                finalizeOrder();
                 showToast("Заказ сформирован");
+                setTimeout(() => {
+                  finalizeOrder();
+                }, 50);
               }}
             >
               Сформировать заказ
@@ -129,8 +131,8 @@ export default function Cart() {
 
               <div className="history-actions">
                 <button onClick={() => {
-                  copyOrder(order);
                   showToast("Заказ скопирован");
+                  copyOrder(order);
                 }}
                 >
                   Копировать

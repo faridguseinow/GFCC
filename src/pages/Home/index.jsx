@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './style.scss';
 import FloorScheme from "../../components/FloorScheme";
 
@@ -20,10 +20,51 @@ import Plastic from '/src/assets/media/catalogue/plastic.jpg';
 import Dried from '/src/assets/media/catalogue/dried.jpg';
 
 
-export default function index() {
+export default function Home() {
+
+  const [showNotice, setShowNotice] = useState(false);
+
+  useEffect(() => {
+    const dismissed = localStorage.getItem("launchNoticeDismissed");
+    if (!dismissed) {
+      setShowNotice(true);
+    }
+  }, []);
+
+  const closeNotice = () => {
+    localStorage.setItem("launchNoticeDismissed", "true");
+    setShowNotice(false);
+  };
 
   return (
     <div className="main_container ">
+
+      {showNotice && (
+        <div className="launch-notice glass">
+          <div className="notice-content">
+            <h3>GFCC - Версия 1.0.0 — ранний запуск</h3>
+            <p>
+              В связи с большим спросом на просмотр прайс-листа
+              мы запустили приложение в раннем доступе.
+              Возможны технические сбои.
+            </p>
+
+            <p>
+              При возникновении проблем вы можете обратиться
+              в раздел «Профиль» → Связь с разработчиком.
+            </p>
+
+            <p>
+              Приложение активно дорабатывается.
+              Следите за обновлениями в Telegram-канале.
+            </p>
+
+            <button onClick={closeNotice}>
+              Понятно
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="catalogue-wrapper">
 

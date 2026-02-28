@@ -12,16 +12,16 @@ const messages = [
 
 const slides = [
   {
-    title: "Golden Oasis Flowers",
-    text: "Это веб-приложение для клиентов Golden Oasis Flowers."
+    title: "Golden & Oasis Flowers",
+    text: "Это веб-приложение для клиентов Golden Flowers и Oasis Flowers."
   },
   {
-    title: "Свежий прайс",
+    title: "Свежий прайс лист",
     text: "Смотрите актуальный прайс и скачивайте его в компьютерной версии."
   },
   {
     title: "Всегда на связи",
-    text: "Контакты, соцсети и всё необходимое собрано в одном месте."
+    text: "Контакты и соцсети собраны в одном месте."
   }
 ];
 
@@ -32,48 +32,34 @@ export default function WelcomeScreen({ onFinish }) {
   const [step, setStep] = useState(0);
   const touchStartX = useRef(null);
 
-  const message =
+  const userName = localStorage.getItem("userName");
+  const avatar = localStorage.getItem("userAvatar");
+  const randomMessage =
     messages[Math.floor(Math.random() * messages.length)];
 
   useEffect(() => {
     const seen = localStorage.getItem("onboardingSeen");
-
-    if (!seen) {
-      setShowOnboarding(true);
-    } else {
-      // только приветственный splash
-      const timer = setTimeout(() => {
-        handleClose();
-      }, 2700);
-
-      return () => clearTimeout(timer);
-    }
+    if (!seen) setShowOnboarding(true);
+    else setTimeout(() => handleClose(), 2500);
   }, []);
 
   const handleClose = () => {
     setClosing(true);
     setTimeout(() => {
       setVisible(false);
-      onFinish?.();   // сообщаем App что splash завершён
-    }, 500);
+      onFinish?.();
+    }, 800);
   };
 
   const finishOnboarding = () => {
     localStorage.setItem("onboardingSeen", "true");
     setShowOnboarding(false);
-
-    // после онбординга показать короткий splash
-    setTimeout(() => {
-      handleClose();
-    }, 1200);
+    setTimeout(() => handleClose(), 2500);
   };
 
   const next = () => {
-    if (step < slides.length - 1) {
-      setStep(prev => prev + 1);
-    } else {
-      finishOnboarding();
-    }
+    if (step < slides.length - 1) setStep(prev => prev + 1);
+    else finishOnboarding();
   };
 
   const prev = () => {
@@ -86,7 +72,6 @@ export default function WelcomeScreen({ onFinish }) {
 
   const handleTouchEnd = (e) => {
     const delta = e.changedTouches[0].clientX - touchStartX.current;
-
     if (delta > 60) prev();
     if (delta < -60) next();
   };
@@ -99,14 +84,41 @@ export default function WelcomeScreen({ onFinish }) {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="welcome-content">
-        <img src={Logo} alt="Logo" />
+      <div className="gradient-bg" />
 
-        {showOnboarding ? (
-          <>
-            <h1>{slides[step].title}</h1>
-            <p className="slide-text">{slides[step].text}</p>
+      <div className="welcome-container">
 
+        {/* Центр фиксирован */}
+        <div className="center-block">
+          <div className="avatar-wrapper">
+            {avatar ? (
+              <img src={avatar} alt="avatar" className="avatar-img" />
+            ) : (
+              <img src={Logo} alt="logo" className="logo-img" />
+            )}
+          </div>
+
+          <div className="text-block">
+            {showOnboarding ? (
+              <>
+                <h1>{slides[step].title}</h1>
+                <p>{slides[step].text}</p>
+              </>
+            ) : (
+              <>
+                <h1>
+                  {userName
+                    ? `Добро пожаловать, ${userName}`
+                    : "Добро пожаловать"}
+                </h1>
+                <p className="wish">{randomMessage}</p>
+              </>
+            )}
+          </div>
+        </div>
+
+        {showOnboarding && (
+          <div className="bottom-fixed">
             <div className="progress-dots">
               {slides.map((_, index) => (
                 <span
@@ -119,12 +131,7 @@ export default function WelcomeScreen({ onFinish }) {
             <button onClick={next}>
               {step === slides.length - 1 ? "Понятно" : "Далее"}
             </button>
-          </>
-        ) : (
-          <>
-            <h1>Добро пожаловать</h1>
-            <p className="random-msg">{message}</p>
-          </>
+          </div>
         )}
       </div>
     </div>

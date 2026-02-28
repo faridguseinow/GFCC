@@ -20,8 +20,6 @@ import PWAInstallBanner from './components/PWAInstallBanner'
 import Home from './pages/Home';
 
 import Contacts from './pages/Contacts';
-import ContactsGolden from './pages/Contacts/ContactsGolden';
-import ContactsOasis from './pages/Contacts/ContactsOasis';
 
 import Price from './pages/Price';
 
@@ -94,24 +92,6 @@ function App() {
                   element={
                     <KeepAlive cacheKey="contacts">
                       <Contacts />
-                    </KeepAlive>
-                  }
-                />
-
-                <Route
-                  path="/contacts/golden"
-                  element={
-                    <KeepAlive cacheKey="contacts">
-                      <ContactsGolden />
-                    </KeepAlive>
-                  }
-                />
-
-                <Route
-                  path="/contacts/oasis"
-                  element={
-                    <KeepAlive cacheKey="contacts">
-                      <ContactsOasis />
                     </KeepAlive>
                   }
                 />

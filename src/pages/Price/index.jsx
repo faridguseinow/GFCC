@@ -9,6 +9,8 @@ import {
   DEFAULT_CATEGORY_ICON
 } from "../../config/priceCategories";
 
+
+
 const normalizeCategory = (value) => {
   if (!value) return "";
   return value
@@ -19,6 +21,20 @@ const normalizeCategory = (value) => {
 };
 
 export default function Price() {
+
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const check = () => {
+      setIsDesktop(window.innerWidth > 1024);
+    };
+
+    check();
+    window.addEventListener("resize", check);
+
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const selectedCategory = searchParams.get("category");
@@ -93,6 +109,67 @@ export default function Price() {
       (item) => item.key === key
     );
     return match ? match.icon : DEFAULT_CATEGORY_ICON;
+  };
+
+  const handleExport = async () => {
+    try {
+      const res = await fetch(
+        "https://gfcc-price-api-server.onrender.com/api/prices"
+      );
+      const data = await res.json();
+
+      if (!Array.isArray(data)) return;
+
+      const sorted = data
+        .filter((item) => item.category && item.name)
+        .sort((a, b) => {
+          const catCompare =
+            normalizeCategory(a.category)
+              .localeCompare(normalizeCategory(b.category), "ru");
+
+          if (catCompare !== 0) return catCompare;
+
+          return a.name.localeCompare(b.name, "ru");
+        });
+
+      const XLSX = await import("xlsx");
+
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.aoa_to_sheet([]);
+
+      const today = new Date().toLocaleDateString("ru-RU");
+
+      XLSX.utils.sheet_add_aoa(
+        worksheet,
+        [
+          ["ПРАЙС ЛИСТ GOLDEN & OASIS"],
+          [`Актуально на ${today}`],
+          [],
+          ["КАТЕГОРИЯ", "НАИМЕНОВАНИЕ", "ЦЕНА"]
+        ],
+        { origin: "A1" }
+      );
+
+      const rows = sorted.map((item) => [
+        (item.category || "").toUpperCase(),
+        (item.name || "").toUpperCase(),
+        item.extraPrice ?? item.price ?? item.cost ?? ""
+      ]);
+
+      XLSX.utils.sheet_add_aoa(worksheet, rows, { origin: -1 });
+
+      worksheet["!cols"] = [
+        { wch: 30 },
+        { wch: 55 },
+        { wch: 15 }
+      ];
+
+      XLSX.utils.book_append_sheet(workbook, worksheet, "ПРАЙС");
+
+      XLSX.writeFile(workbook, `Price_${today}.xlsx`);
+    } catch (err) {
+      console.error("Ошибка экспорта:", err);
+    }
   };
 
   if (loading) {
@@ -178,8 +255,16 @@ export default function Price() {
 
       <div className="categories-header">
         <h2>Прайс-лист Gold и Oasis</h2>
-        <p>Выберите категорию для просмотра ассортимента</p>
+        <p>Цены для частных лиц (оптовые + 5%)</p>
       </div>
+
+      {isDesktop && (
+          <div className="desktop-export">
+            <button onClick={handleExport}>
+              Скачать Excel прайс-листа
+            </button>
+          </div>
+        )}
 
       <div
         className="price-scroll-container"

@@ -21,6 +21,42 @@
     }
   }
 
+  .desktop-export {
+    position: fixed;
+    right: 16px;
+    top: 16px;
+    display: flex;
+    justify-content: flex-end;
+    padding: 12px 20px 0 20px;
+
+    button {
+      background: rgb(15, 118, 15);
+      border: 1px solid rgba(200, 200, 200, 0.2);
+      color: white;
+      font-size: 12px;
+      font-family: var(--f-regular);
+      padding: 6px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.25s ease;
+
+      &:hover {
+        background: var(--color-primary);
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      &:active {
+        transform: scale(0.96);
+      }
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .desktop-export {
+      display: none;
+    }
+  }
+
   .price-scroll-container {
     flex: 1;
     padding-bottom: 90px;
