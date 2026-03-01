@@ -32,6 +32,9 @@ body.dark-theme {
   -moz-osx-font-smoothing: grayscale;
 }
 
+html, body {
+  background: var(--bg-color);
+}
 
 body {
   margin: 0;
@@ -39,7 +42,6 @@ body {
   justify-content: center;
   min-width: 320px;
   min-height: 100vh;
-  background: var(--bg-color);
   color: var(--text);
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
@@ -64,6 +66,7 @@ button {
   color: var(--text);
   cursor: pointer;
   transition: 0.25s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 button:hover {

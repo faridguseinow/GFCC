@@ -1,10 +1,17 @@
 import { useState, useEffect } from 'react'
+import { useMemo } from "react";
+import { useTheme } from "../../context/ThemeContext";
 import './style.scss'
 
 import { contactsData } from '../../data/contactsData'
 
-import LogoSM from '../../assets/icons/logo_sm_gfcc.png'
-import OasisLogo from '../../assets/icons/logo_sm_oasis.png'
+// import LogoSM from '../../assets/icons/logo_sm_gfcc.png'
+// import OasisLogo from '../../assets/icons/logo_sm_oasis.png'
+
+import OasisLogo from '../../assets/icons/oasis_logo.svg'
+import LogoSM from '/src/assets/icons/logo_sm.svg';
+import LogoTB from '/src/assets/icons/logo_text_black.svg';
+import LogoTW from '/src/assets/icons/logo_text.svg';
 
 import TGimg from '/src/assets/icons/social/icons8-telegram.svg'
 import VKimg from '/src/assets/icons/social/icons8-vk.svg'
@@ -12,7 +19,10 @@ import Insimg from '/src/assets/icons/social/icons8-instagram.svg'
 import YTimg from '/src/assets/icons/social/icons8-youtube.svg'
 
 export default function ContactsPage() {
-
+  const { theme } = useTheme();
+  const logoText = useMemo(() => {
+    return theme === "dark-theme" ? LogoTW : LogoTB;
+  }, [theme]);
   /* ================= BRAND STATE ================= */
 
   const [brand, setBrand] = useState('golden')
@@ -22,16 +32,16 @@ export default function ContactsPage() {
     if (saved) setBrand(saved)
   }, [])
 
-const switchBrand = (value) => {
-  if (value === brand) return
+  const switchBrand = (value) => {
+    if (value === brand) return
 
-  setBrand(value)
-  localStorage.setItem('brand', value)
+    setBrand(value)
+    localStorage.setItem('brand', value)
 
-  if (navigator.vibrate) {
-    navigator.vibrate(10)
+    if (navigator.vibrate) {
+      navigator.vibrate(10)
+    }
   }
-}
   const data = contactsData[brand]
 
   /* ================= CALL LOGIC ================= */
@@ -64,7 +74,7 @@ const switchBrand = (value) => {
   /* ================= RENDER ================= */
 
   return (
-    <div className="contacts-page">
+    <div className="contacts-page" key={theme}>
 
       {/* ===== Fixed Switcher ===== */}
       <div className="brand-switcher">
@@ -74,7 +84,8 @@ const switchBrand = (value) => {
           className={brand === 'golden' ? 'active' : ''}
           onClick={() => switchBrand('golden')}
         >
-          <img src={LogoSM} alt="Golden" />
+          <img src={LogoSM} width={45} alt="logo symbol" />
+          <img src={logoText} width={80} alt="logo text" />
         </button>
 
         <button
@@ -85,7 +96,7 @@ const switchBrand = (value) => {
         </button>
       </div>
       {/* ===== Content ===== */}
-      <div key={brand} className="contacts-content fade">
+      <div key={brand} className="contacts-content">
 
         <h2>Номера отделов</h2>
 

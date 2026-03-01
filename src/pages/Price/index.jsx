@@ -1,15 +1,14 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import PriceList from "../../components/PriceList";
 import NavListItem from "../../components/NavListItem";
+import * as XLSX from "xlsx";
 import "./style.scss";
 
 import {
   priceCategoriesConfig,
   DEFAULT_CATEGORY_ICON
 } from "../../config/priceCategories";
-
-
 
 const normalizeCategory = (value) => {
   if (!value) return "";
@@ -23,18 +22,6 @@ const normalizeCategory = (value) => {
 export default function Price() {
 
   const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const check = () => {
-      setIsDesktop(window.innerWidth > 1024);
-    };
-
-    check();
-    window.addEventListener("resize", check);
-
-    return () => window.removeEventListener("resize", check);
-  }, []);
-
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const selectedCategory = searchParams.get("category");
@@ -43,54 +30,79 @@ export default function Price() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const categoriesScrollRef = useRef(null);
-  const productsScrollRef = useRef(null);
 
-  /* =============================
-     SAVE SCROLL
-  ============================== */
+  const handleExport = () => {
 
-  const saveCategoriesScroll = () => {
-    if (categoriesScrollRef.current) {
-      sessionStorage.setItem(
-        "categoriesScroll",
-        categoriesScrollRef.current.scrollTop
-      );
+    if (!Array.isArray(data) || data.length === 0) {
+      console.error("Нет данных для экспорта");
+      return;
     }
+
+    const sorted = [...data]
+      .filter(item => item.category && item.name)
+      .sort((a, b) => {
+        const catCompare =
+          normalizeCategory(a.category)
+            .localeCompare(normalizeCategory(b.category), 'ru');
+
+        if (catCompare !== 0) return catCompare;
+
+        return a.name.localeCompare(b.name, 'ru');
+      });
+
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet([]);
+
+    const today = new Date().toLocaleDateString('ru-RU');
+
+    XLSX.utils.sheet_add_aoa(worksheet, [
+      ["ПРАЙС ЛИСТ GFCC"],
+      [`ЦЕНЫ ДЛЯ ЧАСТНЫХ ЛИЦ НА ${today}`],
+      [],
+      ["КАТЕГОРИЯ", "НАИМЕНОВАНИЕ", "ЦЕНА"]
+    ], { origin: "A1" });
+
+    const rows = sorted.map(item => [
+      (item.category || '').toUpperCase(),
+      (item.name || '').toUpperCase(),
+      item.extraPrice ?? item.price ?? item.cost ?? ''
+    ]);
+
+    XLSX.utils.sheet_add_aoa(worksheet, rows, { origin: -1 });
+
+    worksheet["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 2 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 2 } }
+    ];
+
+    worksheet["!cols"] = [
+      { wch: 30 },
+      { wch: 55 },
+      { wch: 15 }
+    ];
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "ПРАЙС");
+
+    XLSX.writeFile(workbook, `GFCC_Price_${today}.xlsx`);
   };
 
-  const saveProductsScroll = () => {
-    if (productsScrollRef.current) {
-      sessionStorage.setItem(
-        "productsScroll",
-        productsScrollRef.current.scrollTop
-      );
-    }
-  };
-
   /* =============================
-     RESTORE SCROLL
+     DESKTOP DETECTION
   ============================== */
 
   useEffect(() => {
-    if (!selectedCategory && categoriesScrollRef.current) {
-      const saved = sessionStorage.getItem("categoriesScroll");
-      if (saved) {
-        categoriesScrollRef.current.scrollTop = Number(saved);
-      }
-    }
-  }, [selectedCategory]);
+    const check = () => {
+      setIsDesktop(window.innerWidth > 1024);
+    };
 
-  useEffect(() => {
-    if (selectedCategory && productsScrollRef.current) {
-      const saved = sessionStorage.getItem("productsScroll");
-      if (saved) {
-        productsScrollRef.current.scrollTop = Number(saved);
-      }
-    }
-  }, [selectedCategory]);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
-  /* ============================= */
+  /* =============================
+     FETCH DATA
+  ============================== */
 
   useEffect(() => {
     fetch("https://gfcc-price-api-server.onrender.com/api/prices")
@@ -104,73 +116,15 @@ export default function Price() {
       });
   }, []);
 
-  const getCategoryIcon = (key) => {
-    const match = priceCategoriesConfig.find(
-      (item) => item.key === key
-    );
-    return match ? match.icon : DEFAULT_CATEGORY_ICON;
-  };
+  /* =============================
+     SCROLL RESET ON CATEGORY CHANGE
+  ============================== */
 
-  const handleExport = async () => {
-    try {
-      const res = await fetch(
-        "https://gfcc-price-api-server.onrender.com/api/prices"
-      );
-      const data = await res.json();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [selectedCategory]);
 
-      if (!Array.isArray(data)) return;
-
-      const sorted = data
-        .filter((item) => item.category && item.name)
-        .sort((a, b) => {
-          const catCompare =
-            normalizeCategory(a.category)
-              .localeCompare(normalizeCategory(b.category), "ru");
-
-          if (catCompare !== 0) return catCompare;
-
-          return a.name.localeCompare(b.name, "ru");
-        });
-
-      const XLSX = await import("xlsx");
-
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.aoa_to_sheet([]);
-
-      const today = new Date().toLocaleDateString("ru-RU");
-
-      XLSX.utils.sheet_add_aoa(
-        worksheet,
-        [
-          ["ПРАЙС ЛИСТ GOLDEN & OASIS"],
-          [`Актуально на ${today}`],
-          [],
-          ["КАТЕГОРИЯ", "НАИМЕНОВАНИЕ", "ЦЕНА"]
-        ],
-        { origin: "A1" }
-      );
-
-      const rows = sorted.map((item) => [
-        (item.category || "").toUpperCase(),
-        (item.name || "").toUpperCase(),
-        item.extraPrice ?? item.price ?? item.cost ?? ""
-      ]);
-
-      XLSX.utils.sheet_add_aoa(worksheet, rows, { origin: -1 });
-
-      worksheet["!cols"] = [
-        { wch: 30 },
-        { wch: 55 },
-        { wch: 15 }
-      ];
-
-      XLSX.utils.book_append_sheet(workbook, worksheet, "ПРАЙС");
-
-      XLSX.writeFile(workbook, `Price_${today}.xlsx`);
-    } catch (err) {
-      console.error("Ошибка экспорта:", err);
-    }
-  };
+  /* ============================= */
 
   if (loading) {
     return <p className="price-loading">Загрузка свежего прайса...</p>;
@@ -182,18 +136,16 @@ export default function Price() {
 
   if (selectedCategory) {
     return (
-      <div className="price-page">
+      <div className="price-page page-slide">
 
         <div className="sticky-header">
           <div className="header-row">
+
             <button
               className="price-back-btn"
-              onClick={() => {
-                saveProductsScroll();
-                navigate("/price");
-              }}
+              onClick={() => navigate("/price")}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z" /></svg>
             </button>
 
             <input
@@ -202,14 +154,11 @@ export default function Price() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
+
           </div>
         </div>
 
-        <div
-          className="price-scroll-container"
-          ref={productsScrollRef}
-          onScroll={saveProductsScroll}
-        >
+        <div className="price-scroll-container">
           <PriceList
             data={data}
             selectedCategory={selectedCategory}
@@ -259,20 +208,18 @@ export default function Price() {
       </div>
 
       {isDesktop && (
-          <div className="desktop-export">
-            <button onClick={handleExport}>
-              Скачать Excel прайс-листа
-            </button>
-          </div>
-        )}
+        <div className="desktop-export">
+          <button onClick={handleExport}>
+            Скачать Excel прайс-листа
+          </button>
+        </div>
+      )}
 
-      <div
-        className="price-scroll-container"
-        ref={categoriesScrollRef}
-        onScroll={saveCategoriesScroll}
-      >
+      <div className="price-scroll-container">
         {categories.map((cat) => {
-          const Icon = getCategoryIcon(cat.key);
+          const Icon = priceCategoriesConfig.find(c => c.key === cat.key)?.icon
+            || DEFAULT_CATEGORY_ICON;
+
           return (
             <NavListItem
               key={cat.key}

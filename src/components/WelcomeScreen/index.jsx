@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import Logo from "/icons/icon-512x512.png";
+import Logo from "../../assets/icons/logo.svg";
 import "./style.scss";
 
 const messages = [
@@ -13,7 +13,7 @@ const messages = [
 const slides = [
   {
     title: "Golden & Oasis Flowers",
-    text: "Это веб-приложение для клиентов Golden Flowers и Oasis Flowers."
+    text: "Это приложение для клиентов оптовых цветочных баз Golden Flowers и Oasis Flowers."
   },
   {
     title: "Свежий прайс лист",
@@ -21,11 +21,11 @@ const slides = [
   },
   {
     title: "Всегда на связи",
-    text: "Контакты и соцсети собраны в одном месте."
+    text: "Контакты, соцсети и другая информация о нас собраны в одном месте."
   }
 ];
 
-export default function WelcomeScreen({ onFinish }) {
+export default function WelcomeScreen({ onFinish, onReady }) {
   const [visible, setVisible] = useState(true);
   const [closing, setClosing] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -36,6 +36,10 @@ export default function WelcomeScreen({ onFinish }) {
   const avatar = localStorage.getItem("userAvatar");
   const randomMessage =
     messages[Math.floor(Math.random() * messages.length)];
+
+  useEffect(() => {
+    onReady?.();
+  }, []);
 
   useEffect(() => {
     const seen = localStorage.getItem("onboardingSeen");

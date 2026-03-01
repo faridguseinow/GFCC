@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useTheme } from "/src/useTheme";
+import { useTheme } from "../../context/ThemeContext";
 import NavListItem from "../../components/NavListItem";
 import "./style.scss";
 
@@ -88,7 +88,7 @@ export default function Others() {
         <div className="profile-fields">
           <input
             type="text"
-            placeholder="Как вас называть?"
+            placeholder="Как вас зовут?"
             value={name}
             onChange={handleNameChange}
           />
@@ -100,7 +100,7 @@ export default function Others() {
       <div className="section">
         <div className="section-title">Настройки</div>
 
-        <div className="settings-item glass">
+        <div className="settings-theme">
           <span>Темная тема</span>
 
           <div
@@ -111,13 +111,17 @@ export default function Others() {
           </div>
         </div>
 
-        <div className="settings-item glass" onClick={clearCache}>
-          <span>Очистить кэш</span>
+        <div className="cache-remove">
+          <div className="settings-cache glass" onClick={clearCache}>
+            <span>Очистить кэш</span>
+          </div>
+
+          <div className="settings-cache glass" onClick={resetProfile}>
+            <span>Сбросить профиль</span>
+          </div>
         </div>
 
-        <div className="settings-item glass" onClick={resetProfile}>
-          <span>Сбросить профиль</span>
-        </div>
+
 
       </div>
 
@@ -132,11 +136,16 @@ export default function Others() {
       <div className="section">
         <div className="section-title">Поддержка</div>
         <NavListItem title="Частые вопросы" to="/others/faq" />
+        <NavListItem
+          title="Политика конфиденциальности"
+          to="/others/privacy"
+        />
+        <NavListItem title="Пользовательское соглашение" to="/others/terms" />
 
         <a
-          href="https://t.me/YOUR_TELEGRAM_USERNAME"
+          href="https://t.me/faridguseinow"
           target="_blank"
-          className="developer-link glass"
+          className="developer-link"
         >
           Связь с разработчиком
         </a>
@@ -144,6 +153,7 @@ export default function Others() {
 
       {/* VERSION */}
       <div className="app-version">
+        ООО "Голд Флаурс" - GFCC - Все права защищены. <br />
         Версия приложения {APP_VERSION}
       </div>
 

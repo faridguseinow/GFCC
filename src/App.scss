@@ -24,6 +24,7 @@
 /* базовая структура */
 
 * {
+  -webkit-tap-highlight-color: transparent;
   box-sizing: border-box;
   margin: 0;
 }
@@ -36,7 +37,8 @@ body {
   color: var(--text);
 }
 
-p, span {
+p,
+span {
   font-family: var(--f-regular) !important;
 }
 
@@ -87,6 +89,33 @@ select {
   to {
     transform: translateY(20px);
     opacity: 0;
+  }
+}
+
+body {
+  transition:
+    background 0.4s ease,
+    color 0.3s ease;
+}
+
+body.theme-blur {
+  animation: blurTheme 0.45s ease forwards;
+}
+
+@keyframes blurTheme {
+  0% {
+    filter: blur(0px);
+    opacity: 1;
+  }
+
+  40% {
+    filter: blur(3px);
+    opacity: 0.85;
+  }
+
+  100% {
+    filter: blur(0px);
+    opacity: 1;
   }
 }
 

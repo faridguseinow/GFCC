@@ -1,15 +1,21 @@
 import {
-  BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
-  useLocation
+  useLocation,
+  useNavigate
 } from 'react-router-dom';
+
+import { App as CapacitorApp } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
+import { SplashScreen } from '@capacitor/splash-screen';
 
 import { useEffect, useState } from 'react';
 import { AliveScope, KeepAlive } from 'react-activation';
+
 import { CartProvider } from "./context/CartContext";
 import { ToastProvider } from "./context/ToastContext";
+import { ThemeProvider } from "./context/ThemeContext";
 
 import './App.scss';
 import './reset.css';
@@ -31,6 +37,9 @@ import FAQPage from './pages/Others/FAQPage';
 
 import Footer from './layouts/Footer';
 
+import Privacy from "./pages/Others/Privacy";
+import Terms from "./pages/Others/Terms";
+
 // ———————————————
 // Scroll Restoration (всё кроме /price)
 function ScrollHandler() {
@@ -45,11 +54,50 @@ function ScrollHandler() {
   return null;
 }
 
-// ———————————————
-// Основной компонент
 function App() {
+  const [appReady, setAppReady] = useState(false);
   const [welcomeVisible, setWelcomeVisible] = useState(true);
+
+  const handleWelcomeReady = async () => {
+    setAppReady(true);
+
+    if (Capacitor.isNativePlatform()) {
+      await SplashScreen.hide();
+    }
+  };
+
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
   const [isInstalled, setIsInstalled] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const isKeyboard =
+        window.innerHeight < window.screen.height * 0.75;
+
+      setKeyboardOpen(isKeyboard);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (Capacitor.getPlatform() !== 'android') return;
+
+    const listener = CapacitorApp.addListener('backButton', () => {
+      if (location.pathname === '/') {
+        CapacitorApp.exitApp();
+      } else {
+        navigate(-1);
+      }
+    });
+
+    return () => {
+      listener.then(l => l.remove());
+    };
+  }, [location]);
 
   useEffect(() => {
     const standalone =
@@ -59,80 +107,79 @@ function App() {
     setIsInstalled(standalone);
   }, []);
 
-  return (
+  const isPriceCategoryPage =
+    location.pathname === "/price" &&
+    location.search.includes("category=");
+
+
+  const hideFooterRoutes = [
+    "/others/privacy",
+    "/others/privacy",
+    "/others/terms",
+    "/others/faq",
+    "/others/converter"
+  ];
+
+  const shouldHideFooter =
+    hideFooterRoutes.includes(location.pathname) ||
+    keyboardOpen ||
+    isPriceCategoryPage;
+
+return (
+  <ThemeProvider>
     <div className="app-container">
       <CartProvider>
         <ToastProvider>
-          <Router>
 
-            {welcomeVisible && (
-              <WelcomeScreen onFinish={() => setWelcomeVisible(false)} />
-            )}
+          {welcomeVisible ? (
+            <WelcomeScreen
+              onFinish={() => setWelcomeVisible(false)}
+              onReady={handleWelcomeReady}
+            />
+          ) : (
+            <>
+              {!isInstalled && <PWAInstallBanner />}
 
-            {!welcomeVisible && !isInstalled && (
-              <PWAInstallBanner />
-            )}
+              <ScrollHandler />
 
-            <ScrollHandler />
+              <AliveScope>
+                <Routes>
+                  <Route
+                    path="/"
+                    element={
+                      <KeepAlive cacheKey="home">
+                        <Home />
+                      </KeepAlive>
+                    }
+                  />
+                  <Route path="/contacts" element={<Contacts />} />
+                  <Route
+                    path="/price"
+                    element={
+                      <KeepAlive cacheKey="price">
+                        <Price />
+                      </KeepAlive>
+                    }
+                  />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/others" element={<Others />} />
+                  <Route path="/others/converter" element={<ConverterPage />} />
+                  <Route path="/others/faq" element={<FAQPage />} />
+                  <Route path="/others/privacy" element={<Privacy />} />
+                  <Route path="/others/terms" element={<Terms />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </AliveScope>
 
-            <AliveScope>
-              <Routes>
+              {!shouldHideFooter && <Footer />}
+            </>
+          )}
 
-                <Route
-                  path="/"
-                  element={
-                    <KeepAlive cacheKey="home">
-                      <Home />
-                    </KeepAlive>
-                  }
-                />
-
-                <Route
-                  path="/contacts"
-                  element={
-                    <KeepAlive cacheKey="contacts">
-                      <Contacts />
-                    </KeepAlive>
-                  }
-                />
-
-                <Route
-                  path="/price"
-                  element={
-                    <KeepAlive cacheKey="price">
-                      <Price />
-                    </KeepAlive>
-                  }
-                />
-
-                <Route
-                  path="/cart"
-                  element={<Cart />}
-                />
-
-                <Route
-                  path="/others"
-                  element={
-                    <Others />
-                  }
-                />
-
-                <Route path="/others/converter" element={<ConverterPage />} />
-                <Route path="/others/faq" element={<FAQPage />} />
-
-
-                <Route path="*" element={<Navigate to="/" replace />} />
-
-              </Routes>
-            </AliveScope>
-
-            <Footer />
-
-          </Router>
         </ToastProvider>
       </CartProvider>
     </div>
-  );
+  </ThemeProvider>
+);
 }
 
 

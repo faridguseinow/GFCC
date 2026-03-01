@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">GFCC</string>
+    <string name="title_activity_main">GFCC</string>
+    <string name="package_name">RU.GFCC.OASIS</string>
+    <string name="custom_url_scheme">RU.GFCC.OASIS</string>
+</resources>
