@@ -91,118 +91,234 @@
 
   .contacts-content {
 
-
     h2 {
+      font-size: 20px;
+      font-family: var(--f-bold);
       text-align: center;
-      font-size: 24px;
-      margin-bottom: 20px;
-      font-weight: 600;
+      padding-bottom: 16px;
     }
-
-    /* ===== Grid ===== */
 
     .contacts-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
+      gap: 18px;
+    }
 
-      .contact-card {
-        padding: 16px;
-        border-radius: 20px;
-        min-height: 120px;
+    @media (max-width: 768px) {
+      .contacts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
 
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
+    .contact-card {
+      background: var(--glass-bg);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 10px 30px var(--shadow);
+      transition: 0.25s ease;
 
-        cursor: pointer;
-        transition: transform 0.15s ease;
+    }
 
-        &:active {
-          transform: scale(0.97);
-        }
+    .contact-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      font-family: var(--f-bold);
+    }
 
-        h4 {
-          font-size: 15px;
-          font-weight: 500;
-          margin-bottom: 10px;
-        }
+    .contact-body {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
 
-        .phone-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
+    .phone-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-          span {
-            font-size: 11px;
-            opacity: 0.6;
-          }
+    .phone-number {
+      font-size: 16px;
+      font-weight: 500;
+      font-family: var(--f-regular);
+      color: var(--text);
+      opacity: 0.6;
+      cursor: pointer;
+      transition: 0.2s ease;
 
-          .tg-btn {
-            width: 30px;
-            height: 30px;
+      &:hover {
+        color: var(--color-primary);
+      }
 
-            display: flex;
-            align-items: center;
-            justify-content: center;
+      &:active {
+        transform: scale(0.97);
+      }
+    }
 
-            img {
-              width: 25px;
-              height: 25px;
-            }
-          }
-        }
+    .tg-btn {
+      width: 32px;
+      height: 24px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.2s all ease ;
+
+      img {
+        width: 24px;
+      }
+
+      &:hover {
+        transform: scale(1.1);
+      }
+
+      &:active {
+        transform: scale(0.9);
       }
     }
 
     /* ===== Social Block ===== */
 
     .social-block {
-      margin-top: 30px;
-      padding: 20px;
-      border-radius: 24px;
-      text-align: center;
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 32px;
+      background: var(--glass-bg);
+      box-shadow:
+        0 20px 60px var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
 
       h3 {
-        margin-bottom: 14px;
+        text-align: center;
+        font-size: 19px;
         font-weight: 600;
+        letter-spacing: 0.5px;
+        font-family: var(--f-bold);
       }
+    }
 
-      .social-icons {
+    /* ===== СОЦСЕТИ ===== */
+
+    .social-icons {
+      display: flex;
+      justify-content: center;
+      gap: 22px;
+
+      a {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: var(--bg-color);
         display: flex;
+        align-items: center;
         justify-content: center;
-        gap: 16px;
-        margin-bottom: 16px;
+        transition: 0.3s ease;
+        box-shadow:
+          0 6px 18px var(--shadow);
 
-        a {
-          display: flex;
-          align-items: center;
-          justify-content: center;
+        img {
+          width: 30px;
+          height: 30px;
+        }
 
-          img {
-            width: 28px;
-            height: 28px;
-          }
+        &:hover {
+          transform: translateY(-6px);
+          box-shadow:
+            0 14px 35px var(--shadow);
+        }
+
+        &:active {
+          transform: scale(0.9);
         }
       }
 
+      /* Цвет при hover */
+
+      .instagram:hover {
+        background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af, #515bd4);
+      }
+
+      .telegram:hover {
+        background: #229ED9;
+      }
+
+      .vk:hover {
+        background: #4C75A3;
+      }
+
+      .youtube:hover {
+        background: #FF0000;
+      }
+    }
+
+    /* ===== НИЖНИЙ БЛОК ===== */
+
+    .contact-footer {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-family: var(--f-regular);
+
       .address {
-        margin-bottom: 14px;
-        font-size: 13px;
-        opacity: 0.8;
+        max-width: 350px;
+        font-size: 14px;
+        line-height: 1.6;
+        text-decoration: none;
+        color: var(--text);
+        opacity: 0.6;
+        transition: 0.25s ease;
+        position: relative;
+        text-align: center;
+        text-decoration: underline;
+
+        &:hover {
+          color: var(--color-primary);
+        }
       }
 
       .links {
         display: flex;
         flex-direction: column;
-        gap: 6px;
-        font-size: 13px;
+        align-items: center;
+        gap: 8px;
+        text-align: right;
 
         a {
+          font-size: 14px;
+          font-weight: 500;
           text-decoration: none;
           color: var(--text);
+          opacity: 0.6;
+          transition: 0.2s ease;
+
+          &:hover {
+            color: var(--color-primary);
+          }
         }
       }
+
+      @media (max-width: 768px) {
+        .contact-footer {
+          flex-direction: column;
+          gap: 18px;
+        }
+
+        .links {
+          text-align: left;
+        }
+      }
+
     }
+
+
+
   }
 }

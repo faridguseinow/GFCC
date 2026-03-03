@@ -71,17 +71,6 @@ function App() {
   const navigate = useNavigate();
   const [isInstalled, setIsInstalled] = useState(false);
 
-  useEffect(() => {
-    const handleResize = () => {
-      const isKeyboard =
-        window.innerHeight < window.screen.height * 0.75;
-
-      setKeyboardOpen(isKeyboard);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   useEffect(() => {
     if (Capacitor.getPlatform() !== 'android') return;
@@ -107,79 +96,82 @@ function App() {
     setIsInstalled(standalone);
   }, []);
 
-  const isPriceCategoryPage =
-    location.pathname === "/price" &&
-    location.search.includes("category=");
+  useEffect(() => {
+    const handleFocusIn = (e) => {
+      const tag = e.target.tagName.toLowerCase();
+      if (tag === "input" || tag === "textarea") {
+        setKeyboardOpen(true);
+      }
+    };
 
+    const handleFocusOut = () => {
+      setKeyboardOpen(false);
+    };
 
-  const hideFooterRoutes = [
-    "/others/privacy",
-    "/others/privacy",
-    "/others/terms",
-    "/others/faq",
-    "/others/converter"
-  ];
+    window.addEventListener("focusin", handleFocusIn);
+    window.addEventListener("focusout", handleFocusOut);
 
-  const shouldHideFooter =
-    hideFooterRoutes.includes(location.pathname) ||
-    keyboardOpen ||
-    isPriceCategoryPage;
+    return () => {
+      window.removeEventListener("focusin", handleFocusIn);
+      window.removeEventListener("focusout", handleFocusOut);
+    };
+  }, []);
 
-return (
-  <ThemeProvider>
-    <div className="app-container">
-      <CartProvider>
-        <ToastProvider>
+  return (
+    <ThemeProvider>
+      <div className="app-container">
+        <CartProvider>
+          <ToastProvider>
 
-          {welcomeVisible ? (
-            <WelcomeScreen
-              onFinish={() => setWelcomeVisible(false)}
-              onReady={handleWelcomeReady}
-            />
-          ) : (
-            <>
-              {!isInstalled && <PWAInstallBanner />}
+            {welcomeVisible ? (
+              <WelcomeScreen
+                onFinish={() => setWelcomeVisible(false)}
+                onReady={handleWelcomeReady}
+              />
+            ) : (
+              <>
+                {!isInstalled && <PWAInstallBanner />}
 
-              <ScrollHandler />
+                <ScrollHandler />
 
-              <AliveScope>
-                <Routes>
-                  <Route
-                    path="/"
-                    element={
-                      <KeepAlive cacheKey="home">
-                        <Home />
-                      </KeepAlive>
-                    }
-                  />
-                  <Route path="/contacts" element={<Contacts />} />
-                  <Route
-                    path="/price"
-                    element={
-                      <KeepAlive cacheKey="price">
-                        <Price />
-                      </KeepAlive>
-                    }
-                  />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/others" element={<Others />} />
-                  <Route path="/others/converter" element={<ConverterPage />} />
-                  <Route path="/others/faq" element={<FAQPage />} />
-                  <Route path="/others/privacy" element={<Privacy />} />
-                  <Route path="/others/terms" element={<Terms />} />
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-              </AliveScope>
+                <AliveScope>
+                  <Routes>
+                    <Route
+                      path="/"
+                      element={
+                        <KeepAlive cacheKey="home">
+                          <Home />
+                        </KeepAlive>
+                      }
+                    />
+                    <Route path="/contacts" element={<Contacts />} />
+                    <Route
+                      path="/price"
+                      element={
+                        <KeepAlive cacheKey="price">
+                          <Price />
+                        </KeepAlive>
+                      }
+                    />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/others" element={<Others />} />
+                    <Route path="/others/converter" element={<ConverterPage />} />
+                    <Route path="/others/faq" element={<FAQPage />} />
+                    <Route path="/others/privacy" element={<Privacy />} />
+                    <Route path="/others/terms" element={<Terms />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </AliveScope>
 
-              {!shouldHideFooter && <Footer />}
-            </>
-          )}
+                {!keyboardOpen && <Footer />}
+              </>
+            )}
 
-        </ToastProvider>
-      </CartProvider>
-    </div>
-  </ThemeProvider>
-);
+          </ToastProvider>
+        </CartProvider>
+      </div>
+    </ThemeProvider>
+  );
 }
 
 

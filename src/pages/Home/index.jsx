@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import "./style.scss";
 import FloorScheme from "../../components/FloorScheme";
 import LazyImage from "../../components/LazyImage";
+import DepartmentVideosSection from "../../components/DepartmentVideosSection";
+import ClientQR from "../../components/ClientQR";
 
 const catalogueMain = [
   { title: "Розы", img: "/catalogue/roses.webp" },
@@ -45,25 +47,40 @@ export default function Home() {
       {showNotice && (
         <div className="launch-notice glass">
           <div className="notice-content">
-            <h3>GFCC — Версия 1.0.0</h3>
-            <p>
-              Приложение запущено в раннем доступе из-за высокого спроса на прайс-лист.
-              Возможны технические сбои.
-            </p>
-            <p>
+            <ul>GFCC — Версия 1.1.0 - полноценная</ul>
+            <li>
+              Это доработанная первая
+              версия приложения. Изменения:<br />1. Добавили поиск товара прямо из категорий; <br />2. Улучшили функционал и дизайн раздела контактов; <br />3. При клике на адрес компании в разделе контактов кидает в яндекс карты;<br />4. Добавили Карту клиента;<br />3. Добавили видеораздел с обзорами отделов компании Golden Flowers.
+            </li>
+            <li>
               При проблемах: Профиль → Связь с разработчиком.
-            </p>
-            <p>
+            </li>
+            <li>
               Мы активно дорабатываем функционал. Следите за обновлениями в Telegram.
-            </p>
+            </li>
             <button onClick={closeNotice}>Понятно</button>
           </div>
         </div>
       )}
 
+      <ClientQR />
+
+      <div className="qr-about-wrapper">
+        <h2>Карта клиента — это быстрый доступ к вашему профилю в базе.
+        </h2>
+        <p>- Введите 6-значный код и создайте персональный штрих-код для сканирования на зоне подсчёта товаров (на диктовке). <br />
+
+          - Сотруднику больше не нужно искать вас по фамилии — достаточно одного сканирования.
+          Это быстрее, удобнее и исключает ошибки. <br />
+
+          - Получить код можно на кассе, в офисе или через раздел «Профиль → Связь с разработчиком».</p>
+      </div>
+
+      <DepartmentVideosSection />
+
       <div className="catalogue-wrapper">
 
-        <h1 className="catalogue-title">Каталог товаров</h1>
+        <h1 className="catalogue-title">Основной ассортимент</h1>
 
         <div className="catalogue-grid">
           {catalogueMain.map((item) => (
@@ -71,7 +88,7 @@ export default function Home() {
           ))}
         </div>
 
-        <h1 className="catalogue-title">Сопутствующие</h1>
+        <h1 className="catalogue-title">Сопутствующие товары</h1>
 
         <div className="catalogue-grid">
           {catalogueExtra.map((item) => (

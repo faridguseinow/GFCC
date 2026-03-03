@@ -127,6 +127,7 @@ export const contactsData = {
       site: 'https://www.gfcc.ru',
       siteLabel: 'www.gfcc.ru',
       email: 'info@gfcc.ru',
+      mapLink: 'https://yandex.com/maps/-/CPqZjDz6',
       address: 'Московская область, Ленинский городской округ, деревня Апаринки, владение 9, строение 1, помещение 3'
     }
   },
@@ -225,6 +226,7 @@ export const contactsData = {
       site: 'https://www.oasisflowers.ru',
       siteLabel: 'www.oasisflowers.ru',
       email: 'oasis@gfcc.ru',
+      mapLink: 'https://yandex.com/maps/-/CPq6EN53',
       address: 'Московская область, Балашиха, территория Западная Коммунальная Зона, шоссе Энтузиастов, вл11, с3'
     }
   }

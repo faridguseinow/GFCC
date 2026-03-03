@@ -1,5 +1,6 @@
 .privacy-page {
   padding: 16px;
+  padding-bottom: 90px;
 
   .privacy-container {
     padding: 24px;
@@ -65,10 +66,12 @@
 
 @media (min-width: 768px) {
   .privacy-page {
-    padding-top: 32px;
+    padding: 32px 16px;
+    padding-bottom: 90px;
 
     .privacy-container {
       padding: 32px 40px;
+
     }
   }
 }

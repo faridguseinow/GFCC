@@ -98,7 +98,7 @@ export default function Terms() {
 
         <section>
           <h2>8. Контактная информация</h2>
-          <p>Email: info@gfcc.ru</p>
+          <p>Email: goldenflowerscc@gmail.com</p>
           <p>
             Связь с разработчиком доступна через раздел
             «Профиль» в приложении.

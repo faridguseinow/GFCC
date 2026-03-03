@@ -27,6 +27,7 @@
     "npm": "^11.2.0",
     "react": "^19.0.0",
     "react-activation": "^0.13.2",
+    "react-barcode": "^1.6.1",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.2.0",
     "sass": "^1.85.0",

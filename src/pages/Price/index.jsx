@@ -30,7 +30,6 @@ export default function Price() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
-
   const handleExport = () => {
 
     if (!Array.isArray(data) || data.length === 0) {
@@ -86,98 +85,41 @@ export default function Price() {
     XLSX.writeFile(workbook, `GFCC_Price_${today}.xlsx`);
   };
 
-  /* =============================
-     DESKTOP DETECTION
-  ============================== */
 
+
+  /* DESKTOP */
   useEffect(() => {
-    const check = () => {
-      setIsDesktop(window.innerWidth > 1024);
-    };
-
+    const check = () => setIsDesktop(window.innerWidth > 1024);
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  /* =============================
-     FETCH DATA
-  ============================== */
-
+  /* FETCH */
   useEffect(() => {
     fetch("https://gfcc-price-api-server.onrender.com/api/prices")
-      .then((res) => res.json())
-      .then((json) => {
+      .then(res => res.json())
+      .then(json => {
         const cleaned = Array.isArray(json)
-          ? json.filter((i) => i.name && i.category)
+          ? json.filter(i => i.name && i.category)
           : [];
         setData(cleaned);
         setLoading(false);
       });
   }, []);
 
-  /* =============================
-     SCROLL RESET ON CATEGORY CHANGE
-  ============================== */
-
+  /* SCROLL RESET */
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [selectedCategory]);
-
-  /* ============================= */
 
   if (loading) {
     return <p className="price-loading">Загрузка свежего прайса...</p>;
   }
 
-  /* =============================
-     PRODUCTS MODE
-  ============================== */
-
-  if (selectedCategory) {
-    return (
-      <div className="price-page page-slide">
-
-        <div className="sticky-header">
-          <div className="header-row">
-
-            <button
-              className="price-back-btn"
-              onClick={() => navigate("/price")}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z" /></svg>
-            </button>
-
-            <input
-              className="price-search"
-              placeholder="Поиск товара..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-
-          </div>
-        </div>
-
-        <div className="price-scroll-container">
-          <PriceList
-            data={data}
-            selectedCategory={selectedCategory}
-            searchTerm={searchTerm}
-            fontSize={14}
-          />
-        </div>
-
-      </div>
-    );
-  }
-
-  /* =============================
-     CATEGORIES MODE
-  ============================== */
-
+  /* CATEGORY MAP */
   const categoryMap = {};
-
-  data.forEach((item) => {
+  data.forEach(item => {
     const clean = normalizeCategory(item.category);
     if (!categoryMap[clean]) categoryMap[clean] = 0;
     categoryMap[clean]++;
@@ -187,51 +129,102 @@ export default function Price() {
     .sort((a, b) => {
       const configA = priceCategoriesConfig.find(c => c.key === a[0]);
       const configB = priceCategoriesConfig.find(c => c.key === b[0]);
-
       const orderA = configA ? configA.order : 999;
       const orderB = configB ? configB.order : 999;
-
       return orderA - orderB;
     })
-    .map(([key, count]) => ({
-      key,
-      title: key,
-      count
-    }));
+    .map(([key, count]) => ({ key, title: key, count }));
+
+  const showProducts = Boolean(selectedCategory);
 
   return (
     <div className="price-page">
 
-      <div className="categories-header">
-        <h2>Прайс-лист Gold и Oasis</h2>
-        <p>Цены для частных лиц (оптовые + 5%)</p>
+      {/* HEADER всегда один */}
+      <div className={`sticky-header ${!selectedCategory ? "main-header" : ""}`}>
+        <div className={showProducts ? "header-row" : "categories-header"}>
+
+          {showProducts ? (
+            <>
+              <button
+                className="price-back-btn"
+                onClick={() => {
+                  setSearchTerm("");
+                  navigate("/price");
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                  <path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z" />
+                </svg>
+              </button>
+
+              <input
+                className="price-search"
+                placeholder="Поиск товара..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </>
+          ) : (
+            <>
+              <h2>Прайс-лист Gold и Oasis</h2>
+              <p>Цены для частных лиц (оптовые + 5%)</p>
+
+              <div className="header-controls">
+                <input
+                  className="price-search"
+                  placeholder="Поиск товара..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+
+                {isDesktop && (
+                  <button
+                    className="export-btn"
+                    onClick={handleExport}
+                  >
+                    Скачать прайс лист Excel
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+
+        </div>
       </div>
 
-      {isDesktop && (
-        <div className="desktop-export">
-          <button onClick={handleExport}>
-            Скачать Excel прайс-листа
-          </button>
-        </div>
-      )}
+
 
       <div className="price-scroll-container">
-        {categories.map((cat) => {
-          const Icon = priceCategoriesConfig.find(c => c.key === cat.key)?.icon
-            || DEFAULT_CATEGORY_ICON;
 
-          return (
-            <NavListItem
-              key={cat.key}
-              title={cat.title}
-              subtitle={`${cat.count} позиций`}
-              to={`/price?category=${cat.key}`}
-              icon={<Icon />}
-            />
-          );
-        })}
+        {showProducts || searchTerm.trim() !== "" ? (
+          <PriceList
+            data={data}
+            selectedCategory={
+              searchTerm.trim() !== "" ? null : selectedCategory
+            }
+            searchTerm={searchTerm}
+            fontSize={14}
+          />
+        ) : (
+          categories.map((cat) => {
+            const Icon =
+              priceCategoriesConfig.find(c => c.key === cat.key)?.icon
+              || DEFAULT_CATEGORY_ICON;
+
+            return (
+              <NavListItem
+                key={cat.key}
+                title={cat.title}
+                subtitle={`${cat.count} позиций`}
+                to={`/price?category=${cat.key}`}
+                icon={<Icon />}
+              />
+            );
+          })
+        )}
+
       </div>
-
     </div>
   );
 }

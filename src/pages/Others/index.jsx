@@ -3,7 +3,7 @@ import { useTheme } from "../../context/ThemeContext";
 import NavListItem from "../../components/NavListItem";
 import "./style.scss";
 
-const APP_VERSION = "1.0.0";
+const APP_VERSION = "1.1.0";
 
 export default function Others() {
   const { theme, setTheme } = useTheme();

@@ -1,87 +1,146 @@
-import React, { useState, useEffect } from 'react';
-import './style.scss';
+import { useState, useEffect, useMemo } from "react";
+import Barcode from "react-barcode";
+import clients from "../../data/clients.json";
+import "./style.scss";
 
-const LOCAL_IMG_KEY = 'client_qr_image';
-const LOCAL_NAME_KEY = 'client_qr_name';
+const STORAGE_KEY = "client_code";
 
-export default function ClientQR() {
-    const [image, setImage] = useState(null);
-    const [clientName, setClientName] = useState('');
-    const [modalOpen, setModalOpen] = useState(false);
+const ClientQR = () => {
+  const [inputCode, setInputCode] = useState("");
+  const [finalCode, setFinalCode] = useState(null);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [error, setError] = useState("");
 
-    useEffect(() => {
-        const storedImage = localStorage.getItem(LOCAL_IMG_KEY);
-        const storedName = localStorage.getItem(LOCAL_NAME_KEY);
-        if (storedImage) setImage(storedImage);
-        if (storedName) setClientName(storedName);
-    }, []);
-
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = () => {
-            setImage(reader.result);
-            localStorage.setItem(LOCAL_IMG_KEY, reader.result);
-        };
-        reader.readAsDataURL(file);
-    };
-
-    const handleNameChange = (e) => {
-        const name = e.target.value;
-        setClientName(name);
-        localStorage.setItem(LOCAL_NAME_KEY, name);
-    };
-
-    const handleDelete = () => {
-        localStorage.removeItem(LOCAL_IMG_KEY);
-        localStorage.removeItem(LOCAL_NAME_KEY);
-        setImage(null);
-        setClientName('');
-    };
-
-    return (
-        <div className="client-qr-container glass">
-            {!image ? (
-                <label className="upload-area">
-                    Загрузите ваш QR код
-                    <input type="file" accept="image/*" onChange={handleImageChange} hidden />
-                </label>
-            ) : (
-                <>
-                    <div className="name-with-qr">
-                        <div className="name-with-info">
-                            <input
-                                type="text"
-                                placeholder="Название ИП или ООО"
-                                value={clientName}
-                                onChange={handleNameChange}
-                                className="client-name-input glass"
-                            />
-                            <p>*Данный QR покажите сотрудникам диктовки, чтобы они могли быстрее найти вас на нашей базе</p>
-
-                        </div>
-                        <img
-                            src={image}
-                            alt="QR клиента"
-                            className="qr-preview"
-                            onClick={() => setModalOpen(true)}
-                        />
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '16px' }}>
-                        <button className="glass" onClick={handleDelete}>Удалить</button>
-                        <button className="glass" onClick={() => setModalOpen(true)}>Открыть</button>
-                    </div>
-                </>
-            )}
-
-            {modalOpen && (
-                <div className="qr-modal" onClick={() => setModalOpen(false)}>
-                    <img src={image} alt="Полный QR" />
-                </div>
-            )}
-        </div>
+  const clientsMap = useMemo(() => {
+    return Object.fromEntries(
+      clients.map((c) => [c.code, c.name])
     );
-}
+  }, []);
+
+  const clientName = finalCode ? clientsMap[finalCode] : null;
+
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved && clientsMap[saved]) {
+      setFinalCode(saved);
+    }
+  }, [clientsMap]);
+
+  const generateCode = () => {
+    if (inputCode.length !== 6) return;
+
+    if (!clientsMap[inputCode]) {
+      setError("Клиент не найден");
+      return;
+    }
+
+    setError("");
+    localStorage.setItem(STORAGE_KEY, inputCode);
+    setFinalCode(inputCode);
+  };
+
+  const resetCode = () => {
+    localStorage.removeItem(STORAGE_KEY);
+    setFinalCode(null);
+    setInputCode("");
+    setError("");
+  };
+
+  return (
+    <section className={`client-card ${fullscreen ? "fullscreen" : ""}`}>
+      {fullscreen && (
+        <button
+          className="fullscreen-close"
+          onClick={() => setFullscreen(false)}
+        >
+          Закрыть
+        </button>
+      )}
+
+      <div className="card-inner">
+
+        {!fullscreen && (
+          <div className="card-header">
+            <span className="card-title">
+              Карта клиента
+            </span>
+
+            {finalCode && (
+              <button
+                className="fullscreen-btn"
+                onClick={() => setFullscreen(true)}
+              >
+                На весь экран
+              </button>
+            )}
+          </div>
+        )}
+
+        {finalCode ? (
+          <div className="barcode-block">
+
+            {clientName && (
+              <div className="client-name">
+                {clientName}
+              </div>
+            )}
+
+            <Barcode
+              value={finalCode}
+              format="CODE128"
+              width={2.5}
+              height={140}
+              margin={16}
+              displayValue={false}
+              background="#FFFFFF"
+              lineColor="#000000"
+            />
+
+            {!fullscreen && (
+              <button
+                className="secondary-btn"
+                onClick={resetCode}
+              >
+                Изменить код
+              </button>
+            )}
+
+          </div>
+        ) : (
+          <div className="input-block">
+
+            <div className="input-inner">
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                placeholder="Введите 6 цифр"
+                value={inputCode}
+                onChange={(e) =>
+                  setInputCode(e.target.value.replace(/\D/g, ""))
+                }
+              />
+
+              <button
+                disabled={inputCode.length !== 6}
+                onClick={generateCode}
+              >
+                Создать
+              </button>
+            </div>
+
+            {error && (
+              <div className="error">
+                {error}
+              </div>
+            )}
+
+          </div>
+        )}
+
+      </div>
+    </section>
+  );
+};
+
+export default ClientQR;

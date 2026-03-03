@@ -102,29 +102,41 @@ export default function ContactsPage() {
 
         <div className="contacts-grid">
           {data.departments.map((dep, i) => (
-            <div
-              key={i}
-              className="contact-card glass"
-              onClick={() => handleCall(dep.phones)}
-            >
-              <h4>{dep.name}</h4>
+            <div key={i} className="contact-card">
 
-              {dep.phones.map((phone, index) => (
-                <div key={index} className="phone-row">
-                  <span>{phone.label}</span>
+              <div className="contact-title">
+                {dep.name}
+              </div>
 
-                  {phone.telegram && (
-                    <a
-                      href={phone.telegram}
-                      target="_blank"
-                      onClick={(e) => e.stopPropagation()}
-                      className="tg-btn"
+              <div className="contact-body">
+                {dep.phones.map((phone, index) => (
+                  <div key={index} className="phone-row">
+
+                    <div
+                      className="phone-number"
+                      onClick={() =>
+                        window.location.href = `tel:${phone.label.replace(/\s/g, '')}`
+                      }
                     >
-                      <img src={TGimg} alt="telegram" />
-                    </a>
-                  )}
-                </div>
-              ))}
+                      {phone.label}
+                    </div>
+
+                    {phone.telegram && (
+                      <a
+                        href={phone.telegram}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="tg-btn"
+                      >
+                        <img src={TGimg} alt="telegram" />
+                      </a>
+                    )}
+
+                  </div>
+                ))}
+              </div>
+
             </div>
           ))}
         </div>
@@ -135,32 +147,41 @@ export default function ContactsPage() {
           <h3>Социальные сети</h3>
 
           <div className="social-icons">
-            <a href={data.social.instagram} target="_blank">
+            <a href={data.social.instagram} target="_blank" rel="noopener noreferrer" className="instagram">
               <img src={Insimg} alt="instagram" />
             </a>
-            <a href={data.social.telegram} target="_blank">
+            <a href={data.social.telegram} target="_blank" rel="noopener noreferrer" className="telegram">
               <img src={TGimg} alt="telegram" />
             </a>
-            <a href={data.social.vk} target="_blank">
+            <a href={data.social.vk} target="_blank" rel="noopener noreferrer" className="vk">
               <img src={VKimg} alt="vk" />
             </a>
-            <a href={data.social.youtube} target="_blank">
+            <a href={data.social.youtube} target="_blank" rel="noopener noreferrer" className="youtube">
               <img src={YTimg} alt="youtube" />
             </a>
           </div>
 
-          <div className="address">
-            {data.social.address}
-          </div>
+          <div className="contact-footer">
 
-          <div className="links">
-            <a href={data.social.site} target="_blank">
-              {data.social.siteLabel}
+            <a
+              href={data.social.mapLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="address"
+            >
+              {data.social.address}
             </a>
 
-            <a href={`mailto:${data.social.email}`}>
-              {data.social.email}
-            </a>
+            <div className="links">
+              <a href={data.social.site} target="_blank" rel="noopener noreferrer">
+                {data.social.siteLabel}
+              </a>
+
+              <a href={`mailto:${data.social.email}`}>
+                {data.social.email}
+              </a>
+            </div>
+
           </div>
         </div>
 
