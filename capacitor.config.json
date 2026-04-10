@@ -1,0 +1,12 @@
+{
+  "appId": "RU.GFCC.OASIS",
+  "appName": "GFCC",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false,
+      "backgroundColor": "#ffffff",
+      "showSpinner": false
+    }
+  }
+}

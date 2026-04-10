@@ -1,0 +1,309 @@
+.contacts-page {
+  padding: 16px 16px 100px;
+
+  /* =========================
+     Brand Switcher (iOS style)
+  ========================== */
+
+  .brand-switcher {
+    position: sticky;
+    margin-bottom: 16px;
+    top: 16px;
+    left: 50%;
+    min-width: 300px;
+    height: 46px;
+
+    display: flex;
+    align-items: center;
+
+    border-radius: 999px;
+    background: rgba(120, 120, 120, 0.15);
+    backdrop-filter: blur(20px);
+
+    z-index: 100;
+    overflow: hidden;
+
+    /* Sliding thumb */
+
+    .switch-thumb {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+
+      width: calc(50% - 4px);
+      height: calc(100% - 8px);
+
+      border-radius: 999px;
+      background: var(--bg-color);
+
+      box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.12),
+        inset 0 0 0 0.5px rgba(255, 255, 255, 0.6);
+
+      transition: transform 0.32s cubic-bezier(.4, 0, .2, 1);
+
+      &.golden {
+        transform: translateX(0%);
+      }
+
+      &.oasis {
+        transform: translateX(100%);
+      }
+    }
+
+    /* Buttons */
+
+    button {
+      position: relative;
+      z-index: 2;
+      padding: 0;
+      margin: 0;
+
+      flex: 1;
+      height: 100%;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background: none;
+      border: none;
+      cursor: pointer;
+
+      opacity: 0.5;
+      transition: opacity 0.2s ease;
+
+      &.active {
+        opacity: 1;
+      }
+
+      img {
+        height: 24px;
+        object-fit: contain;
+        pointer-events: none;
+      }
+    }
+  }
+
+  /* =========================
+     Content
+  ========================== */
+
+  .contacts-content {
+
+    .contacts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    @media (max-width: 768px) {
+      .contacts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .contact-card {
+      background: var(--glass-bg);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 10px 30px var(--shadow);
+      transition: 0.25s ease;
+
+    }
+
+    .contact-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      font-family: var(--f-bold);
+    }
+
+    .contact-body {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .phone-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .phone-number {
+      font-size: 16px;
+      font-weight: 500;
+      font-family: var(--f-regular);
+      color: var(--text);
+      opacity: 0.6;
+      cursor: pointer;
+      transition: 0.2s ease;
+
+      &:hover {
+        color: var(--color-primary);
+      }
+
+      &:active {
+        transform: scale(0.97);
+      }
+    }
+
+    .tg-btn {
+      width: 32px;
+      height: 24px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.2s all ease ;
+
+      img {
+        width: 24px;
+      }
+
+      &:hover {
+        transform: scale(1.1);
+      }
+
+      &:active {
+        transform: scale(0.9);
+      }
+    }
+
+    /* ===== Social Block ===== */
+
+    .social-block {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 32px;
+      background: var(--glass-bg);
+      box-shadow:
+        0 20px 60px var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* ===== СОЦСЕТИ ===== */
+
+    .social-icons {
+      display: flex;
+      justify-content: center;
+      gap: 22px;
+
+      a {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: var(--bg-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.3s ease;
+        box-shadow:
+          0 6px 18px var(--shadow);
+
+        img {
+          width: 30px;
+          height: 30px;
+        }
+
+        &:hover {
+          transform: translateY(-6px);
+          box-shadow:
+            0 14px 35px var(--shadow);
+        }
+
+        &:active {
+          transform: scale(0.9);
+        }
+      }
+
+      /* Цвет при hover */
+
+      .instagram:hover {
+        background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af, #515bd4);
+      }
+
+      .telegram:hover {
+        background: #229ED9;
+      }
+
+      .vk:hover {
+        background: #4C75A3;
+      }
+
+      .youtube:hover {
+        background: #FF0000;
+      }
+    }
+
+    /* ===== НИЖНИЙ БЛОК ===== */
+
+    .contact-footer {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-family: var(--f-regular);
+
+      .address {
+        max-width: 350px;
+        font-size: 14px;
+        line-height: 1.6;
+        text-decoration: none;
+        color: var(--text);
+        opacity: 0.6;
+        transition: 0.25s ease;
+        position: relative;
+        text-align: center;
+        text-decoration: underline;
+
+        &:hover {
+          color: var(--color-primary);
+        }
+      }
+
+      .links {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        text-align: right;
+
+        a {
+          font-size: 14px;
+          font-weight: 500;
+          text-decoration: none;
+          color: var(--text);
+          opacity: 0.6;
+          transition: 0.2s ease;
+
+          &:hover {
+            color: var(--color-primary);
+          }
+        }
+      }
+
+      @media (max-width: 768px) {
+        .contact-footer {
+          flex-direction: column;
+          gap: 18px;
+        }
+
+        .links {
+          text-align: left;
+        }
+      }
+
+    }
+
+
+
+  }
+}

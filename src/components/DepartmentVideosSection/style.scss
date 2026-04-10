@@ -1,0 +1,37 @@
+.department-videos {
+  padding: 20px 16px;
+}
+
+.carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 10px 0;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.carousel-item {
+  flex: 0 0 75%;
+  scroll-snap-align: center;
+  transition: all 0.35s ease;
+  opacity: 0.5;
+  transform: scale(0.85);
+  text-decoration: none;
+  color: inherit;
+
+  img {
+    width: 100%;
+    border-radius: 16px;
+    display: block;
+  }
+
+}
+
+.carousel-item.active {
+  opacity: 1;
+  transform: scale(1);
+}

@@ -1,0 +1,96 @@
+/* темы */
+
+body.light-theme {
+  --bg-color: #ffffff;
+  --text: #000000;
+  --color-primary: #5e17eb;
+  --color-footer: #5e17eb1c;
+  --shadow: rgba(83, 83, 83, 0.194);
+  --glass-bg: rgb(255, 255, 255);
+  --icon-color: var(--color-primary);
+  --icon-bg: rgba(91, 23, 235, 0.12);
+}
+
+body.dark-theme {
+  --bg-color: #000000;
+  --text: #ffffff;
+  --color-primary: #ecbb47;
+  --color-footer: #ecba4725;
+  --shadow: rgba(48, 48, 48, 0.405);
+  --glass-bg: rgb(24, 24, 24);
+  --icon-color: var(--color-primary);
+  --icon-bg: rgba(236, 180, 71, 0.18);
+}
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  background: var(--bg-color);
+}
+
+body {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  min-width: 320px;
+  min-height: 100vh;
+  color: var(--text);
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+a {
+  font-weight: 500;
+  color: var(--color-primary);
+  text-decoration: inherit;
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+button {
+  border-radius: 16px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--text);
+  cursor: pointer;
+  transition: 0.25s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:hover {
+  opacity: 0.85;
+}
+
+button:focus,
+button:focus-visible {
+  outline: none;
+}
+
+/* ===== Desktop container ===== */
+
+#root {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.app-container {
+  width: 100%;
+  max-width: 768px;
+  min-height: 100vh;
+  background: var(--bg-color);
+  position: relative;
+}

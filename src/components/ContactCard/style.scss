@@ -1,0 +1,12 @@
+.map-link {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #5a3df0;
+  text-decoration: none;
+  font-weight: 500;
+  transition: 0.2s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}

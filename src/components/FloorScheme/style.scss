@@ -1,0 +1,42 @@
+.floor-section {
+  margin-top: 40px;
+  padding: 0 16px 80px;
+}
+
+.floor-title {
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+.floor-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.floor-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: none;
+  background: var(--shadow);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.floor-btn.active {
+  background: var(--color-primary);
+  color: white;
+}
+
+.floor-image-wrapper {
+  background: var(--glass-bg);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.floor-image-wrapper img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
