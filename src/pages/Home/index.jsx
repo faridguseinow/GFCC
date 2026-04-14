@@ -75,6 +75,9 @@ const getSectionSubtitle = (sectionId, state) => {
 
 export default function Home() {
   const [showNotice, setShowNotice] = useState(false);
+  const [hasClientBarcode, setHasClientBarcode] = useState(() =>
+    !!localStorage.getItem("client_code")
+  );
   const [openSectionId, setOpenSectionId] = useState("");
   const [sectionStates, setSectionStates] = useState(() =>
     SECTION_DEFINITIONS.reduce((acc, section) => {
@@ -94,6 +97,79 @@ export default function Home() {
     if (!dismissed) {
       setShowNotice(true);
     }
+  }, []);
+
+  useEffect(() => {
+    const handleClientCodeReady = (event) => {
+      setHasClientBarcode(!!event.detail?.ready);
+    };
+
+    window.addEventListener("gfcc:client-code-ready", handleClientCodeReady);
+
+    return () => {
+      window.removeEventListener("gfcc:client-code-ready", handleClientCodeReady);
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    setSectionStates((prev) =>
+      SECTION_DEFINITIONS.reduce((acc, section) => {
+        const current = prev[section.id];
+        const isFresh = current?.loaded && Date.now() - current.loadedAt < catalogueCacheTtlMs;
+
+        acc[section.id] = isFresh || current?.loading
+          ? current
+          : {
+            ...current,
+            loading: true
+          };
+
+        return acc;
+      }, {})
+    );
+
+    Promise.all(
+      SECTION_DEFINITIONS.map(async (section) => {
+        const loadSection = SECTION_LOADERS[section.id];
+
+        if (!loadSection) {
+          return [section.id, []];
+        }
+
+        try {
+          const products = await loadSection();
+          return [section.id, Array.isArray(products) ? products : []];
+        } catch {
+          return [section.id, []];
+        }
+      })
+    ).then((entries) => {
+      if (cancelled) {
+        return;
+      }
+
+      const loadedAt = Date.now();
+
+      setSectionStates((prev) =>
+        entries.reduce((acc, [sectionId, products]) => {
+          acc[sectionId] = {
+            ...prev[sectionId],
+            products,
+            loading: false,
+            loaded: true,
+            loadedAt
+          };
+
+          return acc;
+        }, { ...prev })
+      );
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -193,18 +269,20 @@ export default function Home() {
 
       <ClientQR />
 
-      <div className="qr-about-wrapper">
-        <h2>Быстрый доступ к профилю</h2>
-        <p>
-          Введите 6-значный код, полученный на кассе, и используйте штрихкод для быстрого доступа к вашему профилю на нашей базе.
-        </p>
-      </div>
+      {!hasClientBarcode && (
+        <div className="qr-about-wrapper">
+          <h2>Быстрый доступ к профилю</h2>
+          <p>
+            Введите 6-значный код, полученный в офисе (на кассе), и используйте штрихкод для быстрого доступа к вашему профилю на нашей базе.
+          </p>
+        </div>
+      )}
 
       <DepartmentVideosSection />
 
       <section className="catalogue-wrapper">
         <div className="catalogue-heading">
-          <h2>Каталоги</h2>
+          <h2>Каталог товаров</h2>
           <p>Откройте нужный раздел и просматривайте товары в удобном формате.</p>
         </div>
 

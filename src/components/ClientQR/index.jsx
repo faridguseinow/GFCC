@@ -1,7 +1,6 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import Barcode from "react-barcode";
-import fallbackClients from "../../data/clients.json";
-import { getClients } from "../../data/api";
+import { getClientByCode } from "../../data/api";
 import "./style.scss";
 
 const STORAGE_KEY = "client_code";
@@ -11,55 +10,95 @@ const ClientQR = () => {
   const [finalCode, setFinalCode] = useState(null);
   const [fullscreen, setFullscreen] = useState(false);
   const [error, setError] = useState("");
-  const [clients, setClients] = useState(fallbackClients);
-
-  const clientsMap = useMemo(() => {
-    return Object.fromEntries(
-      clients.map((client) => [client.code, client])
-    );
-  }, [clients]);
+  const [client, setClient] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [savedCodeChecked, setSavedCodeChecked] = useState(() =>
+    !localStorage.getItem(STORAGE_KEY)
+  );
 
   useEffect(() => {
     let cancelled = false;
+    const saved = localStorage.getItem(STORAGE_KEY);
 
-    getClients().then((data) => {
-      if (!cancelled && data.length > 0) {
-        setClients(data);
-      }
-    });
+    if (!saved) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setLoading(true);
+    getClientByCode(saved)
+      .then((data) => {
+        if (cancelled) {
+          return;
+        }
+
+        if (!data) {
+          localStorage.removeItem(STORAGE_KEY);
+          setSavedCodeChecked(true);
+          return;
+        }
+
+        setClient(data);
+        setFinalCode(saved);
+        setSavedCodeChecked(true);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setError("Не удалось проверить сохраненный код");
+          setSavedCodeChecked(true);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
 
     return () => {
       cancelled = true;
     };
   }, []);
 
-  const client = finalCode ? clientsMap[finalCode] : null;
+  useEffect(() => {
+    if (!savedCodeChecked) {
+      return;
+    }
+
+    window.dispatchEvent(
+      new CustomEvent("gfcc:client-code-ready", {
+        detail: { ready: !!finalCode }
+      })
+    );
+  }, [finalCode, savedCodeChecked]);
+
   const clientName = client?.name ?? null;
   const clientSklad = client?.sklad ?? null;
 
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved && clientsMap[saved]) {
-      setFinalCode(saved);
+  const generateCode = async () => {
+    if (inputCode.length !== 6 || loading) {
       return;
     }
 
-    if (saved) {
-      localStorage.removeItem(STORAGE_KEY);
-    }
-  }, [clientsMap]);
-
-  const generateCode = () => {
-    if (inputCode.length !== 6) return;
-
-    if (!clientsMap[inputCode]) {
-      setError("Клиент не найден");
-      return;
-    }
-
+    setLoading(true);
     setError("");
-    localStorage.setItem(STORAGE_KEY, inputCode);
-    setFinalCode(inputCode);
+
+    try {
+      const foundClient = await getClientByCode(inputCode);
+
+      if (!foundClient) {
+        setError("Клиент не найден");
+        return;
+      }
+
+      setClient(foundClient);
+      localStorage.setItem(STORAGE_KEY, inputCode);
+      setFinalCode(inputCode);
+    } catch {
+      setError("Сервер клиентов недоступен. Попробуйте позже");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -124,19 +163,18 @@ const ClientQR = () => {
               <input
                 type="text"
                 inputMode="numeric"
-                maxLength={6}
                 placeholder="Введите 6 цифр"
                 value={inputCode}
                 onChange={(e) =>
-                  setInputCode(e.target.value.replace(/\D/g, ""))
+                  setInputCode(e.target.value.replace(/\D/g, "").slice(0, 6))
                 }
               />
 
               <button
-                disabled={inputCode.length !== 6}
+                disabled={inputCode.length !== 6 || loading}
                 onClick={generateCode}
               >
-                Создать
+                {loading ? "Проверка..." : "Создать"}
               </button>
             </div>
 

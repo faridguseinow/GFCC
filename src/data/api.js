@@ -1,16 +1,19 @@
-import fallbackClients from "./clients.json";
-
 const CATALOGUE_SHEET_URL = "https://script.google.com/macros/s/AKfycbz0lsVChjzWLWlpRhDGuBtFASMw9uROdM36dJlBoTMSVI9GCcpv0qrp6xpCebMVYnyEIA/exec";
 const CATALOGUE_SHEET_PROXY_URL = `https://corsproxy.io/?${encodeURIComponent(CATALOGUE_SHEET_URL)}`;
 const CATALOGUE_CACHE_KEY = "gfcc_catalogue_sheet_cache_v4";
 
-const CLIENTS_API_URL = "https://clients-gf-oas-api.onrender.com/clients";
-const CLIENTS_API_PROXY_URL = `https://corsproxy.io/?${encodeURIComponent(CLIENTS_API_URL)}`;
+const DEFAULT_CLIENTS_API_BASE_URL = "https://clients-gf-oas-api.onrender.com";
+const CLIENTS_API_BASE_URL = (
+  import.meta.env.VITE_CLIENTS_API_BASE_URL || DEFAULT_CLIENTS_API_BASE_URL
+).replace(/\/+$/, "");
+const CLIENT_LOOKUP_URL = (code) =>
+  `${CLIENTS_API_BASE_URL}/client-by-code?code=${encodeURIComponent(code)}`;
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 15000;
 
 let memoryCatalogueCache = null;
+let cataloguePayloadPromise = null;
 
 const asArray = (value) => (Array.isArray(value) ? value : []);
 
@@ -87,9 +90,6 @@ const normalizeImageList = (images) => {
 
   return unique(urls);
 };
-
-const normalizeClients = (data) =>
-  asArray(data).filter((client) => client?.code && client?.name);
 
 const mapVariant = (variant, parentItemId, index, parentTitle) => {
   const images = normalizeImageList(variant?.images);
@@ -253,35 +253,45 @@ const loadCataloguePayload = async () => {
     return localCache;
   }
 
-  try {
-    let data;
-
-    try {
-      data = await fetchJson(CATALOGUE_SHEET_URL);
-    } catch {
-      data = await fetchJson(CATALOGUE_SHEET_PROXY_URL);
-    }
-
-    const payload = {
-      fetchedAt: Date.now(),
-      sections: asArray(data?.sections),
-      partners: asArray(data?.partners)
-    };
-
-    memoryCatalogueCache = payload;
-    writeCatalogueCache(payload);
-
-    return payload;
-  } catch (error) {
-    console.error("Catalogue API error:", error);
-
-    if (localCache) {
-      memoryCatalogueCache = localCache;
-      return localCache;
-    }
-
-    return { fetchedAt: 0, sections: [], partners: [] };
+  if (cataloguePayloadPromise) {
+    return cataloguePayloadPromise;
   }
+
+  cataloguePayloadPromise = (async () => {
+    try {
+      let data;
+
+      try {
+        data = await fetchJson(CATALOGUE_SHEET_URL);
+      } catch {
+        data = await fetchJson(CATALOGUE_SHEET_PROXY_URL);
+      }
+
+      const payload = {
+        fetchedAt: Date.now(),
+        sections: asArray(data?.sections),
+        partners: asArray(data?.partners)
+      };
+
+      memoryCatalogueCache = payload;
+      writeCatalogueCache(payload);
+
+      return payload;
+    } catch (error) {
+      console.error("Catalogue API error:", error);
+
+      if (localCache) {
+        memoryCatalogueCache = localCache;
+        return localCache;
+      }
+
+      return { fetchedAt: 0, sections: [], partners: [] };
+    } finally {
+      cataloguePayloadPromise = null;
+    }
+  })();
+
+  return cataloguePayloadPromise;
 };
 
 const getSectionItems = (sections, sectionId) =>
@@ -302,21 +312,39 @@ export async function getProducts() {
   );
 }
 
-export async function getClients() {
-  try {
-    let data;
-
-    try {
-      data = await fetchJson(CLIENTS_API_URL);
-    } catch {
-      data = await fetchJson(CLIENTS_API_PROXY_URL);
-    }
-
-    return normalizeClients(data);
-  } catch (error) {
-    console.error("Clients API error:", error);
-    return normalizeClients(fallbackClients);
+const normalizeClientLookup = (payload, code) => {
+  if (!payload) {
+    return null;
   }
+
+  if (payload.found === false) {
+    return null;
+  }
+
+  const source = payload.client || payload.data || payload;
+  const clientCode = toText(source?.code || code);
+  const name = toText(source?.name);
+
+  if (!name) {
+    return null;
+  }
+
+  return {
+    code: clientCode,
+    name,
+    sklad: toText(source?.sklad || source?.warehouse)
+  };
+};
+
+export async function getClientByCode(code) {
+  const normalizedCode = toText(code);
+  if (!normalizedCode) {
+    return null;
+  }
+
+  const url = CLIENT_LOOKUP_URL(normalizedCode);
+  const payload = await fetchJson(url);
+  return normalizeClientLookup(payload, normalizedCode);
 }
 
 export async function getCatalogueProducts() {
