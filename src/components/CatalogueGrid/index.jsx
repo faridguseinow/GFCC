@@ -10,7 +10,7 @@ export default function CatalogueGrid({
   const getInitialItemsCount = () =>
     window.innerWidth <= 768 ? 8 : 8;
   const getSkeletonItemsCount = () =>
-    window.innerWidth <= 768 ? 2 : 4;
+    window.innerWidth <= 768 ? 3 : 4;
 
   const [visibleCount, setVisibleCount] = useState(getInitialItemsCount);
   const [selectedProduct, setSelectedProduct] = useState(null);

@@ -69,7 +69,7 @@ export default function Others() {
     <div className="others-page">
 
       {/* PROFILE */}
-      <h2 className="nav-title">Приветствие</h2>
+      <div className="section-title">Приветствие</div>
       <div className="profile-section glass">
 
 

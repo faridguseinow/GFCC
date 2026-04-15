@@ -1,0 +1,72 @@
+После каждого изменения в React-коде делай так из корня проекта:
+
+cd "/Users/a1111/Documents/My projects/Github/GFCC"
+source ~/.zshrc
+nvm use 22
+npm run build
+npx cap sync android
+
+
+Если хочешь сразу проверить сборку APK из терминала:
+
+cd "/Users/a1111/Documents/My projects/Github/GFCC/android"
+./gradlew assembleDebug
+Готовый debug APK будет здесь:
+
+/Users/a1111/Documents/My projects/Github/GFCC/android/app/build/outputs/apk/debug/app-debug.apk
+Для release APK:
+
+cd "/Users/a1111/Documents/My projects/Github/GFCC/android"
+./gradlew assembleRelease
+Файл будет здесь:
+
+/Users/a1111/Documents/My projects/Github/GFCC/android/app/build/outputs/apk/release/app-release-unsigned.apk
+Для AAB:
+
+cd "/Users/a1111/Documents/My projects/Github/GFCC/android"
+./gradlew bundleRelease
+Файл будет здесь:
+
+/Users/a1111/Documents/My projects/Github/GFCC/android/app/build/outputs/bundle/release/app-release.aab
+Чтобы открыть Android Studio после синхронизации:
+
+cd "/Users/a1111/Documents/My projects/Github/GFCC"
+npx cap open android
+APK В Android Studio
+
+Сначала в терминале обязательно выполни:
+cd "/Users/a1111/Documents/My projects/Github/GFCC"
+source ~/.zshrc
+nvm use 22
+npm run build
+npx cap sync android
+npx cap open android
+В Android Studio дождись окончания Gradle Sync.
+
+Для тестового APK:
+В верхнем меню выбери Build → Build Bundle(s) / APK(s) → Build APK(s).
+
+После сборки Android Studio покажет уведомление. Нажми locate, чтобы открыть папку с APK.
+
+Обычно APK будет здесь:
+
+android/app/build/outputs/apk/debug/app-debug.apk
+Для релизного AAB или подписанного APK:
+Build → Generate Signed Bundle / APK...
+
+Выбери:
+
+Android App Bundle для Google Play, это .aab
+APK если нужен установочный .apk
+Дальше выбери keystore. Если готового нет, нажми Create new..., задай путь, пароль, alias и данные сертификата.
+
+Выбери build variant release.
+
+Нажми Finish.
+
+После этого Android Studio создаст файл в одной из папок:
+
+android/app/release/
+android/app/build/outputs/apk/release/
+android/app/build/outputs/bundle/release/
+

@@ -1,3 +1,5 @@
+import { CapacitorHttp } from "@capacitor/core";
+
 const CATALOGUE_SHEET_URL = "https://script.google.com/macros/s/AKfycbz0lsVChjzWLWlpRhDGuBtFASMw9uROdM36dJlBoTMSVI9GCcpv0qrp6xpCebMVYnyEIA/exec";
 const CATALOGUE_SHEET_PROXY_URL = `https://corsproxy.io/?${encodeURIComponent(CATALOGUE_SHEET_URL)}`;
 const CATALOGUE_CACHE_KEY = "gfcc_catalogue_sheet_cache_v4";
@@ -223,23 +225,25 @@ const writeCatalogueCache = (payload) => {
 const isFresh = (cache) => !!cache?.fetchedAt && Date.now() - cache.fetchedAt < CACHE_TTL_MS;
 
 const fetchJson = async (url) => {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-
-  try {
-    const response = await fetch(url, {
-      signal: controller.signal,
+  const response = await CapacitorHttp.get({
+    url,
+    responseType: "json",
+    connectTimeout: FETCH_TIMEOUT_MS,
+    readTimeout: FETCH_TIMEOUT_MS,
+    webFetchExtra: {
       cache: "no-store"
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
     }
+  });
 
-    return response.json();
-  } finally {
-    clearTimeout(timeoutId);
+  if (response.status < 200 || response.status >= 300) {
+    throw new Error(`HTTP ${response.status}`);
   }
+
+  if (typeof response.data === "string") {
+    return JSON.parse(response.data);
+  }
+
+  return response.data;
 };
 
 const loadCataloguePayload = async () => {

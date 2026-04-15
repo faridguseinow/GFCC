@@ -3,6 +3,9 @@
   "appName": "GFCC",
   "webDir": "dist",
   "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    },
     "SplashScreen": {
       "launchAutoHide": false,
       "backgroundColor": "#ffffff",
