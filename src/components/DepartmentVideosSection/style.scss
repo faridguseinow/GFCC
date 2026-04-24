@@ -1,12 +1,13 @@
 .department-videos {
-  padding: 20px 16px;
+  padding: 0 var(--page-side-padding);
 }
 
 .carousel {
   display: flex;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  padding: 10px 0;
+  gap: 10px;
+  padding: 10px 2px;
   scrollbar-width: none;
 
   &::-webkit-scrollbar {
@@ -29,6 +30,12 @@
     display: block;
   }
 
+}
+
+@media (max-width: 768px) {
+  .carousel-item {
+    flex-basis: 82%;
+  }
 }
 
 .carousel-item.active {

@@ -1,5 +1,5 @@
 .contacts-page {
-  padding: 16px 16px 100px;
+  padding: var(--header-top-space) var(--page-side-padding) var(--page-bottom-space);
 
   /* =========================
      Brand Switcher (iOS style)
@@ -8,9 +8,10 @@
   .brand-switcher {
     position: sticky;
     margin-bottom: 16px;
-    top: 16px;
+    top: var(--header-top-space);
     left: 50%;
-    min-width: 300px;
+    width: 100%;
+    min-width: 0;
     height: 46px;
 
     display: flex;
@@ -99,7 +100,7 @@
     .contacts-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 18px;
+      gap: var(--page-card-gap);
     }
 
     @media (max-width: 768px) {
@@ -314,5 +315,26 @@
 
 
 
+  }
+}
+
+@media (max-width: 768px) {
+  .contacts-page {
+    .contacts-content {
+      .social-block {
+        padding: 16px;
+        gap: 20px;
+      }
+
+      .contact-footer {
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+
+        .links {
+          text-align: center;
+        }
+      }
+    }
   }
 }

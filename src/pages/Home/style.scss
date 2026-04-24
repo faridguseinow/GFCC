@@ -1,7 +1,8 @@
 .home-page {
-  padding-bottom: 100px;
+  padding: 8px 0 var(--page-bottom-space);
   display: flex;
   flex-direction: column;
+  gap: var(--page-section-gap);
 
   .home-hero {
     margin: 12px 16px 0;
@@ -38,7 +39,7 @@
   }
 
   .qr-about-wrapper {
-    padding: 16px;
+    padding: 0 var(--page-side-padding);
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -53,13 +54,13 @@
   .catalogue-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
   }
 
 }
 
 .catalogue-heading {
-  padding: 0 16px;
+  padding: 0 var(--page-side-padding);
 
   h2 {
     margin: 0;
@@ -75,8 +76,8 @@
 .catalogue-sections {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 0 16px;
+  gap: 14px;
+  padding: 0 var(--page-side-padding);
 }
 
 .catalogue-section-card {
@@ -185,7 +186,7 @@
 /* Launch Notice (inline banner) */
 
 .launch-notice {
-  margin: 24px 16px;
+  margin: 0 var(--page-side-padding);
   border-radius: 20px;
   padding: 16px;
   animation: slideDown 0.35s ease;
@@ -223,6 +224,28 @@
         transform: scale(0.96);
       }
     }
+  }
+}
+
+@media (max-width: 768px) {
+  .catalogue-section-content {
+    padding: 14px 16px 16px;
+    gap: 12px;
+  }
+
+  .catalogue-section-copy {
+    h3 {
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    p {
+      font-size: 14px;
+    }
+  }
+
+  .launch-notice .notice-content {
+    padding: 0;
   }
 }
 

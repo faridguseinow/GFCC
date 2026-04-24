@@ -19,9 +19,9 @@
   max-width: 768px;
   /* 🔥 ограничение как у приложения */
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: flex-start;
-  padding: 0 32px;
+  padding: 0 var(--page-side-padding);
 }
 
 .nav-button {

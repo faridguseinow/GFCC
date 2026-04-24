@@ -1,5 +1,4 @@
 import { CapacitorHttp } from "@capacitor/core";
-import localClients from "./clients.json";
 
 const CATALOGUE_SHEET_URL = "https://script.google.com/macros/s/AKfycbz0lsVChjzWLWlpRhDGuBtFASMw9uROdM36dJlBoTMSVI9GCcpv0qrp6xpCebMVYnyEIA/exec";
 const CATALOGUE_SHEET_PROXY_URL = `https://corsproxy.io/?${encodeURIComponent(CATALOGUE_SHEET_URL)}`;
@@ -14,6 +13,7 @@ const CLIENT_LOOKUP_URL = (code) =>
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 15000;
+const CLIENT_LOOKUP_TIMEOUT_MS = 15000;
 
 let memoryCatalogueCache = null;
 let cataloguePayloadPromise = null;
@@ -247,6 +247,99 @@ const fetchJson = async (url) => {
   return response.data;
 };
 
+const parseJsonSafely = (value) => {
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+};
+
+const unwrapClientPayload = (payload) => {
+  let current = parseJsonSafely(payload);
+
+  for (let index = 0; index < 4; index += 1) {
+    if (typeof current === "string") {
+      const parsed = parseJsonSafely(current);
+      if (parsed === current) {
+        break;
+      }
+
+      current = parsed;
+      continue;
+    }
+
+    if (!current || typeof current !== "object") {
+      break;
+    }
+
+    if (current.client || current.found === false) {
+      break;
+    }
+
+    if ("data" in current && current.data !== current) {
+      current = parseJsonSafely(current.data);
+      continue;
+    }
+
+    if ("body" in current && current.body !== current) {
+      current = parseJsonSafely(current.body);
+      continue;
+    }
+
+    break;
+  }
+
+  return current;
+};
+
+const fetchClientLookupViaFetch = async (url) => {
+  const controller = new AbortController();
+  const timeoutId = globalThis.setTimeout(() => controller.abort(), CLIENT_LOOKUP_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json"
+      },
+      cache: "no-store",
+      signal: controller.signal
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const raw = await response.text();
+    return unwrapClientPayload(raw);
+  } finally {
+    globalThis.clearTimeout(timeoutId);
+  }
+};
+
+const fetchClientLookupViaCapacitor = async (url) => {
+  const response = await CapacitorHttp.get({
+    url,
+    responseType: "json",
+    connectTimeout: CLIENT_LOOKUP_TIMEOUT_MS,
+    readTimeout: CLIENT_LOOKUP_TIMEOUT_MS,
+    webFetchExtra: {
+      cache: "no-store"
+    }
+  });
+
+  if (response.status < 200 || response.status >= 300) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+
+  return unwrapClientPayload(response.data);
+};
+
 const loadCataloguePayload = async () => {
   if (isFresh(memoryCatalogueCache)) {
     return memoryCatalogueCache;
@@ -341,47 +434,24 @@ const normalizeClientLookup = (payload, code) => {
   };
 };
 
-const normalizeClientRecord = (client, code) => {
-  if (!client) {
-    return null;
-  }
-
-  const clientCode = toText(client?.code || client?.clientCode || client?.kod || client?.id || code);
-  const name = toText(client?.name || client?.title || client?.clientName);
-
-  if (!clientCode || !name) {
-    return null;
-  }
-
-  return {
-    code: clientCode.padStart(6, "0"),
-    name,
-    sklad: toText(client?.sklad || client?.warehouse)
-  };
-};
-
-const findLocalClientByCode = (code) => {
-  const normalizedCode = toText(code).padStart(6, "0");
-
-  return asArray(localClients)
-    .map((client) => normalizeClientRecord(client, normalizedCode))
-    .find((client) => client?.code === normalizedCode) || null;
-};
-
 export async function getClientByCode(code) {
-  const normalizedCode = toText(code);
-  if (!normalizedCode) {
+  const rawCode = toText(code);
+  if (!rawCode) {
     return null;
   }
-
-  const localClient = findLocalClientByCode(normalizedCode);
-  if (localClient) {
-    return localClient;
-  }
+  const normalizedCode = rawCode.padStart(6, "0");
 
   try {
     const url = CLIENT_LOOKUP_URL(normalizedCode);
-    const payload = await fetchJson(url);
+    let payload = null;
+
+    try {
+      payload = await fetchClientLookupViaFetch(url);
+    } catch (fetchError) {
+      payload = await fetchClientLookupViaCapacitor(url);
+      console.warn("Client lookup switched to CapacitorHttp fallback:", fetchError);
+    }
+
     return normalizeClientLookup(payload, normalizedCode);
   } catch (error) {
     console.error("Client lookup API error:", error);

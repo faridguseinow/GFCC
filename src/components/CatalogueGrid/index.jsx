@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import "./style.scss";
 
 export default function CatalogueGrid({
@@ -7,6 +8,9 @@ export default function CatalogueGrid({
   title = "",
   linkOnly = false
 }) {
+  const modalRoot = typeof document !== "undefined"
+    ? document.getElementById("modal-root")
+    : null;
   const getInitialItemsCount = () =>
     window.innerWidth <= 768 ? 8 : 8;
   const getSkeletonItemsCount = () =>
@@ -158,7 +162,7 @@ export default function CatalogueGrid({
         </div>
       )}
 
-      {selectedProduct && !linkOnly && (
+      {selectedProduct && !linkOnly && modalRoot && createPortal(
         <div
           className="catalogue-modal-backdrop"
           onClick={closeModal}
@@ -332,7 +336,8 @@ export default function CatalogueGrid({
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        modalRoot
       )}
     </>
   );

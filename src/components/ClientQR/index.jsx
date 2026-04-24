@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Barcode from "react-barcode";
 import { getClientByCode } from "../../data/api";
 import "./style.scss";
@@ -15,6 +16,10 @@ const ClientQR = () => {
   const [savedCodeChecked, setSavedCodeChecked] = useState(() =>
     !localStorage.getItem(STORAGE_KEY)
   );
+  const wakeLockRef = useRef(null);
+  const modalRoot = typeof document !== "undefined"
+    ? document.getElementById("modal-root")
+    : null;
 
   useEffect(() => {
     let cancelled = false;
@@ -72,6 +77,42 @@ const ClientQR = () => {
     );
   }, [finalCode, savedCodeChecked]);
 
+  useEffect(() => {
+    if (!fullscreen) {
+      return () => {};
+    }
+
+    let released = false;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const requestWakeLock = async () => {
+      try {
+        if ("wakeLock" in navigator && navigator.wakeLock?.request) {
+          wakeLockRef.current = await navigator.wakeLock.request("screen");
+        }
+      } catch {
+        wakeLockRef.current = null;
+      }
+    };
+
+    requestWakeLock();
+
+    return () => {
+      if (released) {
+        return;
+      }
+
+      released = true;
+      document.body.style.overflow = previousOverflow;
+
+      if (wakeLockRef.current) {
+        wakeLockRef.current.release().catch(() => {});
+        wakeLockRef.current = null;
+      }
+    };
+  }, [fullscreen]);
+
   const clientName = client?.name ?? null;
   const clientSklad = client?.sklad ?? null;
 
@@ -102,16 +143,8 @@ const ClientQR = () => {
   };
 
   return (
-    <section className={`client-card ${fullscreen ? "fullscreen" : ""}`}>
-      {fullscreen && (
-        <button
-          className="fullscreen-close"
-          onClick={() => setFullscreen(false)}
-        >
-          Закрыть
-        </button>
-      )}
-
+    <>
+      <section className="client-card">
       <div className="card-inner">
 
         {!fullscreen && (
@@ -133,7 +166,6 @@ const ClientQR = () => {
 
         {finalCode ? (
           <div className="barcode-block">
-
             {clientName && (
               <div className="client-name">
                 {clientName}
@@ -154,7 +186,6 @@ const ClientQR = () => {
               background="#FFFFFF"
               lineColor="#000000"
             />
-
           </div>
         ) : (
           <div className="input-block">
@@ -188,7 +219,45 @@ const ClientQR = () => {
         )}
 
       </div>
-    </section>
+      </section>
+
+      {fullscreen && finalCode && modalRoot && createPortal(
+        <div className="client-card fullscreen">
+          <button
+            className="fullscreen-close"
+            onClick={() => setFullscreen(false)}
+          >
+            Закрыть
+          </button>
+
+          <div className="card-inner">
+            <div className="barcode-block">
+              {clientName && (
+                <div className="client-name">
+                  {clientName}
+                </div>
+              )}
+
+              <div className="client-warehouse">
+                Склад: {clientSklad || "-"}
+              </div>
+
+              <Barcode
+                value={finalCode}
+                format="CODE128"
+                width={3.8}
+                height={220}
+                margin={0}
+                displayValue={false}
+                background="#FFFFFF"
+                lineColor="#000000"
+              />
+            </div>
+          </div>
+        </div>,
+        modalRoot
+      )}
+    </>
   );
 };
 

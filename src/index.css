@@ -30,6 +30,14 @@ body.dark-theme {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --page-side-padding: clamp(14px, 4vw, 18px);
+  --page-section-gap: clamp(18px, 4vw, 28px);
+  --page-card-gap: clamp(12px, 3vw, 18px);
+  --header-top-space: calc(12px + var(--safe-top));
+  --bottom-nav-height: calc(80px + var(--safe-bottom));
+  --page-bottom-space: calc(var(--bottom-nav-height) + 24px);
 }
 
 html,

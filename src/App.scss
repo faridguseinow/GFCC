@@ -35,7 +35,7 @@ body {
   width: 100%;
   font-family: var(--f-regular);
   color: var(--text);
-  padding-top: 16px;
+  padding-top: 0;
 }
 
 h1 {
@@ -193,6 +193,12 @@ body.theme-blur {
   .route-shell-animate {
     animation: none;
   }
+}
+
+
+.route-shell {
+  min-height: calc(100vh - var(--bottom-nav-height));
+  padding-bottom: var(--safe-bottom);
 }
 
 /* mobile */
