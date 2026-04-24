@@ -59,6 +59,7 @@ function ScrollHandler() {
 function App() {
   const [appReady, setAppReady] = useState(false);
   const [welcomeVisible, setWelcomeVisible] = useState(true);
+  const [routeAnimating, setRouteAnimating] = useState(false);
 
   const handleWelcomeReady = async () => {
     setAppReady(true);
@@ -73,6 +74,21 @@ function App() {
   const navigate = useNavigate();
   const [isInstalled, setIsInstalled] = useState(false);
 
+  useEffect(() => {
+    setRouteAnimating(false);
+
+    const frame = requestAnimationFrame(() => {
+      setRouteAnimating(true);
+    });
+    const timer = window.setTimeout(() => {
+      setRouteAnimating(false);
+    }, 380);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
+  }, [location.pathname]);
 
   useEffect(() => {
     if (Capacitor.getPlatform() !== 'android') return;
@@ -136,46 +152,48 @@ function App() {
 
                 <ScrollHandler />
 
-                <AliveScope>
-                  <Routes>
-                    <Route
-                      path="/"
-                      element={
-                        <KeepAlive cacheKey="home">
-                          <Home />
-                        </KeepAlive>
-                      }
-                    />
+                <div className={`route-shell ${routeAnimating ? "route-shell-animate" : ""}`}>
+                  <AliveScope>
+                    <Routes>
+                      <Route
+                        path="/"
+                        element={
+                          <KeepAlive cacheKey="home">
+                            <Home />
+                          </KeepAlive>
+                        }
+                      />
 
-                    <Route
-                      path="/product/:id"
-                      element={
-                        <KeepAlive cacheKey="product">
-                          <ProductPage />
-                        </KeepAlive>
-                      }
-                    />
+                      <Route
+                        path="/product/:id"
+                        element={
+                          <KeepAlive cacheKey="product">
+                            <ProductPage />
+                          </KeepAlive>
+                        }
+                      />
 
 
-                    <Route path="/contacts" element={<Contacts />} />
-                    <Route
-                      path="/price"
-                      element={
-                        <KeepAlive cacheKey="price">
-                          <Price />
-                        </KeepAlive>
-                      }
-                    />
-                    <Route path="/cart" element={<Cart />} />
-                    <Route path="/others" element={<Others />} />
-                    <Route path="/others/converter" element={<ConverterPage />} />
-                    <Route path="/others/warehouse" element={<WarehousePage />} />
-                    <Route path="/others/faq" element={<FAQPage />} />
-                    <Route path="/others/privacy" element={<Privacy />} />
-                    <Route path="/others/terms" element={<Terms />} />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                  </Routes>
-                </AliveScope>
+                      <Route path="/contacts" element={<Contacts />} />
+                      <Route
+                        path="/price"
+                        element={
+                          <KeepAlive cacheKey="price">
+                            <Price />
+                          </KeepAlive>
+                        }
+                      />
+                      <Route path="/cart" element={<Cart />} />
+                      <Route path="/others" element={<Others />} />
+                      <Route path="/others/converter" element={<ConverterPage />} />
+                      <Route path="/others/warehouse" element={<WarehousePage />} />
+                      <Route path="/others/faq" element={<FAQPage />} />
+                      <Route path="/others/privacy" element={<Privacy />} />
+                      <Route path="/others/terms" element={<Terms />} />
+                      <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                  </AliveScope>
+                </div>
 
                 {!keyboardOpen && <Footer />}
               </>

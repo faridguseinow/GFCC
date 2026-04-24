@@ -4,6 +4,7 @@ import NavListItem from "../../components/NavListItem";
 import "./style.scss";
 
 const APP_VERSION = "1.4.0";
+const SUPPORT_TELEGRAM_URL = "https://t.me/+79663028881";
 
 export default function Others() {
   const { theme, setTheme } = useTheme();
@@ -54,6 +55,10 @@ export default function Others() {
       setName("");
       setAvatar(null);
     }
+  };
+
+  const openSupport = () => {
+    window.open(SUPPORT_TELEGRAM_URL, "_blank", "noopener,noreferrer");
   };
 
   const initials =
@@ -143,6 +148,11 @@ export default function Others() {
       {/* DEVELOPER */}
       <div className="section">
         <div className="section-title">Поддержка</div>
+        <NavListItem
+          title="Обратиться в поддержку"
+          subtitle="Жалобы, вопросы и помощь"
+          onClick={openSupport}
+        />
         <NavListItem title="Частые вопросы" to="/others/faq" />
         <NavListItem
           title="Политика конфиденциальности"

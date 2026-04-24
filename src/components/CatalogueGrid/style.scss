@@ -18,6 +18,7 @@
     cursor: pointer;
     border: 1px solid color-mix(in srgb, var(--color-primary) 14%, transparent);
     transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+    animation: catalogue-item-in 0.28s ease both;
 
     &:active {
       transform: scale(0.98);
@@ -42,12 +43,18 @@
         background: linear-gradient(135deg, #f5f1e8 0%, #e9e2d3 100%);
       }
     }
+
+    @for $i from 1 through 8 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{($i - 1) * 28}ms;
+      }
+    }
   }
 }
 
 .catalogue-title {
   padding: 10px 8px 12px;
-  font-size: 14px;
+  font-size: 16px;
   font-family: var(--f-bold);
   line-height: 1.35;
   text-align: center;
@@ -280,13 +287,13 @@
 }
 
 .catalogue-variant-description {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.45;
 }
 
 .catalogue-variant-meta {
   margin-top: 8px;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.4;
   opacity: 0.8;
 }
@@ -327,5 +334,23 @@
   to {
     transform: translateY(0);
     opacity: 1;
+  }
+}
+
+@keyframes catalogue-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalogue-grid .catalogue-card {
+    animation: none;
   }
 }

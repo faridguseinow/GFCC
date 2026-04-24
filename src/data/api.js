@@ -1,4 +1,5 @@
 import { CapacitorHttp } from "@capacitor/core";
+import localClients from "./clients.json";
 
 const CATALOGUE_SHEET_URL = "https://script.google.com/macros/s/AKfycbz0lsVChjzWLWlpRhDGuBtFASMw9uROdM36dJlBoTMSVI9GCcpv0qrp6xpCebMVYnyEIA/exec";
 const CATALOGUE_SHEET_PROXY_URL = `https://corsproxy.io/?${encodeURIComponent(CATALOGUE_SHEET_URL)}`;
@@ -340,15 +341,52 @@ const normalizeClientLookup = (payload, code) => {
   };
 };
 
+const normalizeClientRecord = (client, code) => {
+  if (!client) {
+    return null;
+  }
+
+  const clientCode = toText(client?.code || client?.clientCode || client?.kod || client?.id || code);
+  const name = toText(client?.name || client?.title || client?.clientName);
+
+  if (!clientCode || !name) {
+    return null;
+  }
+
+  return {
+    code: clientCode.padStart(6, "0"),
+    name,
+    sklad: toText(client?.sklad || client?.warehouse)
+  };
+};
+
+const findLocalClientByCode = (code) => {
+  const normalizedCode = toText(code).padStart(6, "0");
+
+  return asArray(localClients)
+    .map((client) => normalizeClientRecord(client, normalizedCode))
+    .find((client) => client?.code === normalizedCode) || null;
+};
+
 export async function getClientByCode(code) {
   const normalizedCode = toText(code);
   if (!normalizedCode) {
     return null;
   }
 
-  const url = CLIENT_LOOKUP_URL(normalizedCode);
-  const payload = await fetchJson(url);
-  return normalizeClientLookup(payload, normalizedCode);
+  const localClient = findLocalClientByCode(normalizedCode);
+  if (localClient) {
+    return localClient;
+  }
+
+  try {
+    const url = CLIENT_LOOKUP_URL(normalizedCode);
+    const payload = await fetchJson(url);
+    return normalizeClientLookup(payload, normalizedCode);
+  } catch (error) {
+    console.error("Client lookup API error:", error);
+    return null;
+  }
 }
 
 export async function getCatalogueProducts() {
