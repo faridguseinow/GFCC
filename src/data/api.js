@@ -1,4 +1,4 @@
-import { CapacitorHttp } from "@capacitor/core";
+import { Capacitor, CapacitorHttp } from "@capacitor/core";
 
 const CATALOGUE_SHEET_URL = "https://script.google.com/macros/s/AKfycbz0lsVChjzWLWlpRhDGuBtFASMw9uROdM36dJlBoTMSVI9GCcpv0qrp6xpCebMVYnyEIA/exec";
 const CATALOGUE_SHEET_PROXY_URL = `https://corsproxy.io/?${encodeURIComponent(CATALOGUE_SHEET_URL)}`;
@@ -10,13 +10,19 @@ const CLIENTS_API_BASE_URL = (
 ).replace(/\/+$/, "");
 const CLIENT_LOOKUP_URL = (code) =>
   `${CLIENTS_API_BASE_URL}/client-by-code?code=${encodeURIComponent(code)}`;
+const CLIENTS_INDEX_URL = `${CLIENTS_API_BASE_URL}/clients-index`;
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 15000;
 const CLIENT_LOOKUP_TIMEOUT_MS = 15000;
+const CLIENT_LOOKUP_CACHE_KEY = "gfcc_client_lookup_cache_v1";
+const CLIENTS_INDEX_CACHE_KEY = "gfcc_clients_index_cache_v1";
+const CLIENTS_INDEX_TTL_MS = 12 * 60 * 60 * 1000;
 
 let memoryCatalogueCache = null;
 let cataloguePayloadPromise = null;
+let memoryClientsIndexCache = null;
+let clientsIndexPromise = null;
 
 const asArray = (value) => (Array.isArray(value) ? value : []);
 
@@ -247,6 +253,14 @@ const fetchJson = async (url) => {
   return response.data;
 };
 
+const isNativePlatform = () => {
+  try {
+    return typeof Capacitor?.isNativePlatform === "function" && Capacitor.isNativePlatform();
+  } catch {
+    return false;
+  }
+};
+
 const parseJsonSafely = (value) => {
   if (typeof value !== "string") {
     return value;
@@ -297,7 +311,7 @@ const unwrapClientPayload = (payload) => {
   return current;
 };
 
-const fetchClientLookupViaFetch = async (url) => {
+const fetchClientApiViaFetch = async (url) => {
   const controller = new AbortController();
   const timeoutId = globalThis.setTimeout(() => controller.abort(), CLIENT_LOOKUP_TIMEOUT_MS);
 
@@ -322,7 +336,7 @@ const fetchClientLookupViaFetch = async (url) => {
   }
 };
 
-const fetchClientLookupViaCapacitor = async (url) => {
+const fetchClientApiViaCapacitor = async (url) => {
   const response = await CapacitorHttp.get({
     url,
     responseType: "json",
@@ -338,6 +352,150 @@ const fetchClientLookupViaCapacitor = async (url) => {
   }
 
   return unwrapClientPayload(response.data);
+};
+
+const readClientLookupCache = () => {
+  try {
+    return JSON.parse(localStorage.getItem(CLIENT_LOOKUP_CACHE_KEY) || "{}");
+  } catch {
+    return {};
+  }
+};
+
+const writeClientLookupCache = (code, client) => {
+  try {
+    const cache = readClientLookupCache();
+    cache[code] = client;
+    localStorage.setItem(CLIENT_LOOKUP_CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    // ignore storage errors
+  }
+};
+
+const getCachedClientByCode = (code) => {
+  const cache = readClientLookupCache();
+  return cache?.[code] || null;
+};
+
+const normalizeClientRecord = (record, fallbackCode) => {
+  if (!record || typeof record !== "object") {
+    return null;
+  }
+
+  const code = toText(record.code || record.clientCode || record.kod || fallbackCode).padStart(6, "0");
+  const name = toText(record.name || record.title || record.clientName);
+  const sklad = toText(record.sklad || record.warehouse);
+
+  if (!code || !name) {
+    return null;
+  }
+
+  return { code, name, sklad };
+};
+
+const normalizeClientsIndex = (payload) => {
+  const source = payload?.clients || payload?.index || payload?.data || payload;
+  const index = {};
+
+  if (Array.isArray(source)) {
+    source.forEach((record) => {
+      const normalized = normalizeClientRecord(record);
+      if (normalized) {
+        index[normalized.code] = normalized;
+      }
+    });
+
+    return index;
+  }
+
+  if (source && typeof source === "object") {
+    Object.entries(source).forEach(([code, record]) => {
+      const normalized = normalizeClientRecord(record, code);
+      if (normalized) {
+        index[normalized.code] = normalized;
+      }
+    });
+  }
+
+  return index;
+};
+
+const readClientsIndexCache = () => {
+  try {
+    const raw = JSON.parse(localStorage.getItem(CLIENTS_INDEX_CACHE_KEY) || "null");
+    if (!raw?.fetchedAt || !raw?.index || typeof raw.index !== "object") {
+      return null;
+    }
+
+    return raw;
+  } catch {
+    return null;
+  }
+};
+
+const writeClientsIndexCache = (index) => {
+  const payload = {
+    fetchedAt: Date.now(),
+    index
+  };
+
+  memoryClientsIndexCache = payload;
+
+  try {
+    localStorage.setItem(CLIENTS_INDEX_CACHE_KEY, JSON.stringify(payload));
+  } catch {
+    // ignore storage errors
+  }
+};
+
+const getClientFromIndex = (index, code) => {
+  if (!index || typeof index !== "object") {
+    return null;
+  }
+
+  return normalizeClientRecord(index[code], code);
+};
+
+const isFreshClientsIndex = (cache) =>
+  !!cache?.fetchedAt && Date.now() - cache.fetchedAt < CLIENTS_INDEX_TTL_MS;
+
+const loadClientsIndex = async () => {
+  if (isFreshClientsIndex(memoryClientsIndexCache)) {
+    return memoryClientsIndexCache.index;
+  }
+
+  const localCache = readClientsIndexCache();
+  if (isFreshClientsIndex(localCache)) {
+    memoryClientsIndexCache = localCache;
+    return localCache.index;
+  }
+
+  if (clientsIndexPromise) {
+    return clientsIndexPromise;
+  }
+
+  clientsIndexPromise = (async () => {
+    try {
+      const payload = isNativePlatform()
+        ? await fetchClientApiViaCapacitor(CLIENTS_INDEX_URL)
+        : await fetchClientApiViaFetch(CLIENTS_INDEX_URL);
+
+      const index = normalizeClientsIndex(payload);
+      writeClientsIndexCache(index);
+      return index;
+    } catch (error) {
+      if (localCache?.index) {
+        memoryClientsIndexCache = localCache;
+        return localCache.index;
+      }
+
+      throw error;
+    } finally {
+      clientsIndexPromise = null;
+    }
+  })();
+
+  return clientsIndexPromise;
 };
 
 const loadCataloguePayload = async () => {
@@ -440,22 +598,44 @@ export async function getClientByCode(code) {
     return null;
   }
   const normalizedCode = rawCode.padStart(6, "0");
+  const cachedClient = getCachedClientByCode(normalizedCode);
+  if (cachedClient) {
+    return cachedClient;
+  }
+
+  try {
+    const clientsIndex = await loadClientsIndex();
+    const indexedClient = getClientFromIndex(clientsIndex, normalizedCode);
+
+    if (indexedClient) {
+      writeClientLookupCache(normalizedCode, indexedClient);
+      return indexedClient;
+    }
+  } catch (indexError) {
+    console.warn("Clients index load failed, fallback to direct lookup:", indexError);
+  }
 
   try {
     const url = CLIENT_LOOKUP_URL(normalizedCode);
-    let payload = null;
+    const payload = isNativePlatform()
+      ? await fetchClientApiViaCapacitor(url)
+      : await fetchClientApiViaFetch(url);
 
-    try {
-      payload = await fetchClientLookupViaFetch(url);
-    } catch (fetchError) {
-      payload = await fetchClientLookupViaCapacitor(url);
-      console.warn("Client lookup switched to CapacitorHttp fallback:", fetchError);
+    const client = normalizeClientLookup(payload, normalizedCode);
+
+    if (client) {
+      writeClientLookupCache(normalizedCode, client);
+      return client;
     }
 
-    return normalizeClientLookup(payload, normalizedCode);
+    if (payload?.found === false) {
+      return null;
+    }
+
+    throw new Error("Client lookup returned invalid payload");
   } catch (error) {
     console.error("Client lookup API error:", error);
-    return null;
+    throw error;
   }
 }
 

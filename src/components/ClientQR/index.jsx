@@ -40,6 +40,8 @@ const ClientQR = () => {
 
         if (!data) {
           localStorage.removeItem(STORAGE_KEY);
+          setClient(null);
+          setFinalCode(null);
           setSavedCodeChecked(true);
           return;
         }
@@ -50,7 +52,10 @@ const ClientQR = () => {
       })
       .catch(() => {
         if (!cancelled) {
-          setError("Не удалось проверить сохраненный код");
+          localStorage.removeItem(STORAGE_KEY);
+          setClient(null);
+          setFinalCode(null);
+          setError("Не удалось проверить сохранённый код");
           setSavedCodeChecked(true);
         }
       })
@@ -128,6 +133,9 @@ const ClientQR = () => {
       const foundClient = await getClientByCode(inputCode);
 
       if (!foundClient) {
+        setClient(null);
+        setFinalCode(null);
+        localStorage.removeItem(STORAGE_KEY);
         setError("Клиент не найден");
         return;
       }
@@ -136,6 +144,9 @@ const ClientQR = () => {
       localStorage.setItem(STORAGE_KEY, inputCode);
       setFinalCode(inputCode);
     } catch {
+      setClient(null);
+      setFinalCode(null);
+      localStorage.removeItem(STORAGE_KEY);
       setError("Сервер клиентов недоступен. Попробуйте позже");
     } finally {
       setLoading(false);
