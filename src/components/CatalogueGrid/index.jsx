@@ -11,12 +11,9 @@ export default function CatalogueGrid({
   const modalRoot = typeof document !== "undefined"
     ? document.getElementById("modal-root")
     : null;
-  const getInitialItemsCount = () =>
-    window.innerWidth <= 768 ? 8 : 8;
   const getSkeletonItemsCount = () =>
-    window.innerWidth <= 768 ? 3 : 4;
+    window.innerWidth <= 768 ? 4 : 6;
 
-  const [visibleCount, setVisibleCount] = useState(getInitialItemsCount);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [activeImage, setActiveImage] = useState("");
   const [activeItems, setActiveItems] = useState(products);
@@ -47,15 +44,7 @@ export default function CatalogueGrid({
   useEffect(() => {
     setActiveItems(products);
     setParentProduct(null);
-    setVisibleCount(getInitialItemsCount());
   }, [products]);
-
-  const visibleProducts = useMemo(
-    () => activeItems.slice(0, visibleCount),
-    [activeItems, visibleCount]
-  );
-
-  const hasMore = visibleCount < activeItems.length;
 
   const currentTitle = parentProduct?.title || title;
 
@@ -70,7 +59,6 @@ export default function CatalogueGrid({
     if (product.variants?.length) {
       setParentProduct(product);
       setActiveItems(product.variants);
-      setVisibleCount(getInitialItemsCount());
       return;
     }
 
@@ -103,7 +91,7 @@ export default function CatalogueGrid({
   return (
     <>
       <div className="catalogue-grid">
-        {visibleProducts.map((item) => (
+        {activeItems.map((item) => (
           <button
             key={item.id}
             type="button"
@@ -138,7 +126,6 @@ export default function CatalogueGrid({
             onClick={() => {
               setParentProduct(null);
               setActiveItems(products);
-              setVisibleCount(getInitialItemsCount());
             }}
           >
             ← Назад
@@ -147,18 +134,6 @@ export default function CatalogueGrid({
           <div className="catalogue-subtitle">
             {parentProduct.title}
           </div>
-        </div>
-      )}
-
-      {hasMore && (
-        <div className="catalogue-more-wrap">
-          <button
-            type="button"
-            className="catalogue-more-btn"
-            onClick={() => setVisibleCount((current) => current + getInitialItemsCount())}
-          >
-            Загрузить еще
-          </button>
         </div>
       )}
 

@@ -97,12 +97,6 @@
   }
 }
 
-.catalogue-more-wrap {
-  padding: 4px 16px 0;
-  display: flex;
-  justify-content: center;
-}
-
 .catalogue-subheader {
   display: flex;
   align-items: center;
@@ -123,19 +117,6 @@
   font-size: 13px;
   opacity: 0.68;
   text-align: right;
-}
-
-.catalogue-more-btn {
-  min-width: 148px;
-  border: none;
-  border-radius: 999px;
-  padding: 10px 16px;
-  font-size: 13px;
-  font-family: var(--f-bold);
-  background: var(--color-primary);
-  color: #fff;
-  cursor: pointer;
-  box-shadow: 0 10px 18px color-mix(in srgb, var(--color-primary) 32%, transparent);
 }
 
 .catalogue-modal-backdrop {
