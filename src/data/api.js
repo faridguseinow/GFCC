@@ -604,18 +604,6 @@ export async function getClientByCode(code) {
   }
 
   try {
-    const clientsIndex = await loadClientsIndex();
-    const indexedClient = getClientFromIndex(clientsIndex, normalizedCode);
-
-    if (indexedClient) {
-      writeClientLookupCache(normalizedCode, indexedClient);
-      return indexedClient;
-    }
-  } catch (indexError) {
-    console.warn("Clients index load failed, fallback to direct lookup:", indexError);
-  }
-
-  try {
     const url = CLIENT_LOOKUP_URL(normalizedCode);
     const payload = isNativePlatform()
       ? await fetchClientApiViaCapacitor(url)
@@ -629,13 +617,37 @@ export async function getClientByCode(code) {
     }
 
     if (payload?.found === false) {
+      try {
+        const clientsIndex = await loadClientsIndex();
+        const indexedClient = getClientFromIndex(clientsIndex, normalizedCode);
+
+        if (indexedClient) {
+          writeClientLookupCache(normalizedCode, indexedClient);
+          return indexedClient;
+        }
+      } catch (indexError) {
+        console.warn("Clients index load failed after empty direct lookup:", indexError);
+      }
+
       return null;
     }
 
     throw new Error("Client lookup returned invalid payload");
-  } catch (error) {
-    console.error("Client lookup API error:", error);
-    throw error;
+  } catch (directLookupError) {
+    try {
+      const clientsIndex = await loadClientsIndex();
+      const indexedClient = getClientFromIndex(clientsIndex, normalizedCode);
+
+      if (indexedClient) {
+        writeClientLookupCache(normalizedCode, indexedClient);
+        return indexedClient;
+      }
+    } catch (indexError) {
+      console.warn("Clients index load failed after direct lookup error:", indexError);
+    }
+
+    console.error("Client lookup API error:", directLookupError);
+    throw directLookupError;
   }
 }
 
