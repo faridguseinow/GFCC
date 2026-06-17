@@ -17,7 +17,7 @@
     background: linear-gradient(180deg, color-mix(in srgb, var(--glass-bg) 92%, transparent) 0%, color-mix(in srgb, var(--bg-color) 86%, var(--color-primary) 14%) 100%);
     cursor: pointer;
     border: 1px solid color-mix(in srgb, var(--color-primary) 14%, transparent);
-    transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+    transition: transform 0.24s ease, border-color 0.24s ease;
     animation: catalogue-item-in 0.28s ease both;
 
     &:active {
@@ -26,7 +26,6 @@
 
     &:hover {
       border-color: color-mix(in srgb, var(--color-primary) 28%, transparent);
-      box-shadow: 0 18px 34px color-mix(in srgb, var(--shadow) 95%, transparent);
     }
 
     .catalogue-image-wrapper {
@@ -56,6 +55,7 @@
   padding: 10px 8px 12px;
   font-size: 16px;
   font-family: var(--f-bold);
+  font-weight: 700;
   line-height: 1.35;
   text-align: center;
   min-height: 56px;
@@ -138,7 +138,6 @@
   border-radius: 28px 28px 0 0;
   background: var(--bg-color);
   color: var(--text);
-  box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.2);
   animation: catalogue-sheet-up 0.28s ease;
 }
 
@@ -264,6 +263,7 @@
 
 .catalogue-variant-name {
   font-family: var(--f-bold);
+  font-weight: 700;
   margin-bottom: 8px;
 }
 
@@ -294,6 +294,7 @@
   color: #fff;
   text-decoration: none;
   font-family: var(--f-bold);
+  font-weight: 700;
 }
 
 @keyframes catalogue-fade-in {

@@ -13,6 +13,7 @@
   .profile-section {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 16px;
     padding: 20px;
     border-radius: 24px;
@@ -96,8 +97,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      min-height: 64px;
       padding: 8px 16px;
-      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+      border-radius: 20px;
+      background: var(--glass-bg);
     }
 
     .settings-item {
@@ -112,23 +116,13 @@
         transform: scale(0.97);
       }
     }
-
-      .developer-link {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 18px 16px;
-        border-top: 1px solid rgba(0, 0, 0, 0.05);
-        text-decoration: none;
-        color: var(--text);
-        font-family: var(--f-regular);
-      }
     }
 
   .ios-switch {
     width: 46px;
     height: 26px;
     background: #ccc;
+    border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
     border-radius: 20px;
     position: relative;
     transition: 0.3s;
@@ -137,7 +131,7 @@
       background: var(--color-primary);
 
       .switch-circle {
-        left: 22px;
+        left: 21px;
       }
     }
 
@@ -147,9 +141,9 @@
       background: white;
       border-radius: 50%;
       position: absolute;
-      top: 2px;
+      top: 1.5px;
       left: 2px;
-      transition: 0.3s;
+      transition: 0.4s;
     }
   }
 
@@ -165,13 +159,11 @@
 @media (max-width: 640px) {
   .others-page {
     .profile-section {
-      align-items: flex-start;
       gap: 14px;
     }
 
     .section {
       .cache-remove {
-        flex-direction: column;
         gap: 10px;
       }
     }

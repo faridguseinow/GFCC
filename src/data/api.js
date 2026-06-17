@@ -15,7 +15,7 @@ const CLIENTS_INDEX_URL = `${CLIENTS_API_BASE_URL}/clients-index`;
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 15000;
 const CLIENT_LOOKUP_TIMEOUT_MS = 15000;
-const CLIENT_LOOKUP_CACHE_KEY = "gfcc_client_lookup_cache_v1";
+const CLIENT_LOOKUP_CACHE_KEY = "gfcc_client_lookup_cache_v2";
 const CLIENTS_INDEX_CACHE_KEY = "gfcc_clients_index_cache_v1";
 const CLIENTS_INDEX_TTL_MS = 12 * 60 * 60 * 1000;
 
@@ -203,7 +203,7 @@ const readCatalogueCache = () => {
   try {
     const raw = localStorage.getItem(CATALOGUE_CACHE_KEY);
     if (!raw) {
-      return null;
+      return [];
     }
 
     const parsed = JSON.parse(raw);
@@ -362,19 +362,28 @@ const readClientLookupCache = () => {
   }
 };
 
-const writeClientLookupCache = (code, client) => {
+const writeClientLookupCache = (code, clients) => {
   try {
     const cache = readClientLookupCache();
-    cache[code] = client;
+    cache[code] = clients;
     localStorage.setItem(CLIENT_LOOKUP_CACHE_KEY, JSON.stringify(cache));
   } catch {
     // ignore storage errors
   }
 };
 
-const getCachedClientByCode = (code) => {
+const getCachedClientsByCode = (code) => {
   const cache = readClientLookupCache();
-  return cache?.[code] || null;
+  const cached = cache?.[code];
+
+  if (Array.isArray(cached)) {
+    return cached
+      .map((record) => normalizeClientRecord(record, code))
+      .filter(Boolean);
+  }
+
+  const normalized = normalizeClientRecord(cached, code);
+  return normalized ? [normalized] : [];
 };
 
 const normalizeClientRecord = (record, fallbackCode) => {
@@ -393,6 +402,56 @@ const normalizeClientRecord = (record, fallbackCode) => {
   return { code, name, sklad };
 };
 
+const getClientIdentityKey = (record) =>
+  [
+    toText(record?.code).padStart(6, "0"),
+    toText(record?.sklad || record?.warehouse).toLowerCase(),
+    toText(record?.name || record?.title || record?.clientName).toLowerCase()
+  ].join("|");
+
+const uniqueClientRecords = (records) => {
+  const seen = new Set();
+
+  return records.filter((record) => {
+    const identity = getClientIdentityKey(record);
+    if (!identity || seen.has(identity)) {
+      return false;
+    }
+
+    seen.add(identity);
+    return true;
+  });
+};
+
+const normalizeClientCollection = (source, fallbackCode) => {
+  if (!source) {
+    return [];
+  }
+
+  if (Array.isArray(source)) {
+    return uniqueClientRecords(
+      source
+        .map((record) => normalizeClientRecord(record, fallbackCode))
+        .filter(Boolean)
+    );
+  }
+
+  if (typeof source !== "object") {
+    return [];
+  }
+
+  if ("code" in source || "name" in source || "sklad" in source || "warehouse" in source) {
+    const normalized = normalizeClientRecord(source, fallbackCode);
+    return normalized ? [normalized] : [];
+  }
+
+  return uniqueClientRecords(
+    Object.entries(source).flatMap(([code, record]) =>
+      normalizeClientCollection(record, code)
+    )
+  );
+};
+
 const normalizeClientsIndex = (payload) => {
   const source = payload?.clients || payload?.index || payload?.data || payload;
   const index = {};
@@ -401,8 +460,12 @@ const normalizeClientsIndex = (payload) => {
     source.forEach((record) => {
       const normalized = normalizeClientRecord(record);
       if (normalized) {
-        index[normalized.code] = normalized;
+        index[normalized.code] = [...(index[normalized.code] || []), normalized];
       }
+    });
+
+    Object.keys(index).forEach((code) => {
+      index[code] = uniqueClientRecords(index[code]);
     });
 
     return index;
@@ -410,12 +473,17 @@ const normalizeClientsIndex = (payload) => {
 
   if (source && typeof source === "object") {
     Object.entries(source).forEach(([code, record]) => {
-      const normalized = normalizeClientRecord(record, code);
-      if (normalized) {
-        index[normalized.code] = normalized;
-      }
+      const normalizedRecords = normalizeClientCollection(record, code);
+
+      normalizedRecords.forEach((normalized) => {
+        index[normalized.code] = [...(index[normalized.code] || []), normalized];
+      });
     });
   }
+
+  Object.keys(index).forEach((code) => {
+    index[code] = uniqueClientRecords(index[code]);
+  });
 
   return index;
 };
@@ -448,12 +516,12 @@ const writeClientsIndexCache = (index) => {
   }
 };
 
-const getClientFromIndex = (index, code) => {
+const getClientsFromIndex = (index, code) => {
   if (!index || typeof index !== "object") {
-    return null;
+    return [];
   }
 
-  return normalizeClientRecord(index[code], code);
+  return normalizeClientCollection(index[code], code);
 };
 
 const isFreshClientsIndex = (cache) =>
@@ -570,37 +638,35 @@ export async function getProducts() {
 
 const normalizeClientLookup = (payload, code) => {
   if (!payload) {
-    return null;
+    return [];
   }
 
   if (payload.found === false) {
-    return null;
+    return [];
   }
 
-  const source = payload.client || payload.data || payload;
-  const clientCode = toText(source?.code || code);
-  const name = toText(source?.name);
+  const primarySource = payload?.clients || payload?.data?.clients || payload?.body?.clients;
+  const primaryClients = normalizeClientCollection(primarySource, code);
 
-  if (!name) {
-    return null;
+  if (primaryClients.length > 0) {
+    return primaryClients;
   }
 
-  return {
-    code: clientCode,
-    name,
-    sklad: toText(source?.sklad || source?.warehouse)
-  };
+  const fallbackSource = payload.client || payload.data || payload;
+  return normalizeClientCollection(fallbackSource, code);
 };
 
-export async function getClientByCode(code) {
+export async function getClientsByCode(code) {
   const rawCode = toText(code);
   if (!rawCode) {
-    return null;
+    return [];
   }
+
   const normalizedCode = rawCode.padStart(6, "0");
-  const cachedClient = getCachedClientByCode(normalizedCode);
-  if (cachedClient) {
-    return cachedClient;
+  const cachedClients = getCachedClientsByCode(normalizedCode);
+
+  if (cachedClients.length > 0) {
+    return cachedClients;
   }
 
   try {
@@ -609,21 +675,21 @@ export async function getClientByCode(code) {
       ? await fetchClientApiViaCapacitor(url)
       : await fetchClientApiViaFetch(url);
 
-    const client = normalizeClientLookup(payload, normalizedCode);
+    const clients = normalizeClientLookup(payload, normalizedCode);
 
-    if (client) {
-      writeClientLookupCache(normalizedCode, client);
-      return client;
+    if (clients.length > 0) {
+      writeClientLookupCache(normalizedCode, clients);
+      return clients;
     }
 
     if (payload?.found === false) {
       try {
         const clientsIndex = await loadClientsIndex();
-        const indexedClient = getClientFromIndex(clientsIndex, normalizedCode);
+        const indexedClients = getClientsFromIndex(clientsIndex, normalizedCode);
 
-        if (indexedClient) {
-          writeClientLookupCache(normalizedCode, indexedClient);
-          return indexedClient;
+        if (indexedClients.length > 0) {
+          writeClientLookupCache(normalizedCode, indexedClients);
+          return indexedClients;
         }
       } catch (indexError) {
         console.warn("Clients index load failed after empty direct lookup:", indexError);
@@ -636,11 +702,11 @@ export async function getClientByCode(code) {
   } catch (directLookupError) {
     try {
       const clientsIndex = await loadClientsIndex();
-      const indexedClient = getClientFromIndex(clientsIndex, normalizedCode);
+      const indexedClients = getClientsFromIndex(clientsIndex, normalizedCode);
 
-      if (indexedClient) {
-        writeClientLookupCache(normalizedCode, indexedClient);
-        return indexedClient;
+      if (indexedClients.length > 0) {
+        writeClientLookupCache(normalizedCode, indexedClients);
+        return indexedClients;
       }
     } catch (indexError) {
       console.warn("Clients index load failed after direct lookup error:", indexError);
@@ -649,6 +715,44 @@ export async function getClientByCode(code) {
     console.error("Client lookup API error:", directLookupError);
     throw directLookupError;
   }
+}
+
+const matchesPreferredClient = (client, preferredSelection) => {
+  if (!preferredSelection) {
+    return false;
+  }
+
+  const preferredCode = toText(preferredSelection.code).padStart(6, "0");
+  const preferredName = toText(preferredSelection.name).toLowerCase();
+  const preferredSklad = toText(preferredSelection.sklad).toLowerCase();
+
+  if (preferredCode && client.code !== preferredCode) {
+    return false;
+  }
+
+  if (preferredSklad && toText(client.sklad).toLowerCase() !== preferredSklad) {
+    return false;
+  }
+
+  if (preferredName && toText(client.name).toLowerCase() !== preferredName) {
+    return false;
+  }
+
+  return true;
+};
+
+export async function getClientByCode(code, preferredSelection = null) {
+  const clients = await getClientsByCode(code);
+
+  if (clients.length === 0) {
+    return null;
+  }
+
+  const matchedClient = clients.find((client) =>
+    matchesPreferredClient(client, preferredSelection)
+  );
+
+  return matchedClient || clients[0];
 }
 
 export async function getCatalogueProducts() {

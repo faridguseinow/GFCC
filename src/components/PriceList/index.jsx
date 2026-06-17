@@ -1,6 +1,8 @@
-import React from "react";
+/* eslint-disable react/prop-types */
 import { useCart } from "../../context/CartContext";
+import { usePriceTier } from "../../context/PriceTierContext";
 import { useToast } from "../../context/ToastContext";
+import { resolvePriceByTier } from "../../utils/priceTier";
 import "./style.scss";
 
 const normalizeCategory = (value) => {
@@ -18,6 +20,27 @@ function format(num) {
     : "–";
 }
 
+const toText = (value) => (value === null || value === undefined ? "" : String(value).trim());
+
+const buildFallbackId = (item) => {
+  const safeName = toText(item?.name).toLowerCase().replace(/\s+/g, "-") || "item";
+  const safeCategory = normalizeCategory(item?.category).toLowerCase() || "catalogue";
+  const safePrice = resolvePriceByTier(item, "extra") ?? 0;
+  return `${safeCategory}-${safeName}-${safePrice}`;
+};
+
+const buildCartProduct = (item, priceTier) => ({
+  id: toText(item?.id) || buildFallbackId(item),
+  name: toText(item?.name) || "Товар",
+  price: resolvePriceByTier(item, priceTier) ?? 0,
+  legacyPrice: resolvePriceByTier(item, priceTier) ?? 0,
+  wholesalePrice: Number.isFinite(Number(item?.wholesalePrice)) ? Number(item.wholesalePrice) : null,
+  extraPrice: Number.isFinite(Number(item?.extraPrice)) ? Number(item.extraPrice) : null,
+  retailPrice: Number.isFinite(Number(item?.retailPrice)) ? Number(item.retailPrice) : null,
+  addedAtPriceTier: priceTier,
+  quantity: 1
+});
+
 export default function PriceList({
   data,
   selectedCategory,
@@ -26,8 +49,8 @@ export default function PriceList({
 }) {
 
   /* ✅ Хук внутри компонента */
-  const { addToCart } = useCart();
-
+  const { activeOrder, addToCart, removeItem, setQuantity } = useCart();
+  const { priceTier } = usePriceTier();
   const { showToast } = useToast();
 
   const filtered = data.filter((item) => {
@@ -58,36 +81,49 @@ export default function PriceList({
           <tr>
             <th>Наименование</th>
             <th>Цена</th>
-            {/* <th></th> */}
+            <th></th>
           </tr>
         </thead>
 
         <tbody>
-          {sorted.map((item, idx) => (
-            <tr key={idx}>
+          {sorted.map((item, idx) => {
+            const itemId = toText(item?.id) || buildFallbackId(item);
+            const isSelected = activeOrder.some((cartItem) => cartItem.id === itemId);
+
+            return (
+            <tr key={itemId || idx} className={isSelected ? "selected-row" : ""}>
               <td>{item.name?.toUpperCase()}</td>
-              <td>{format(item.extraPrice)}</td>
+              <td>{format(resolvePriceByTier(item, priceTier))}</td>
 
-              {/* ✅ Кнопка внутри td */}
-              {/* <td>
+              <td>
                 <button
-                  className="add-btn"
+                  className={`add-btn ${isSelected ? "selected-btn" : ""}`}
                   onClick={() => {
-                    addToCart({
-                      id: item.id,
-                      name: item.name,
-                      price: item.extraPrice
-                    });
+                    const previousItem = activeOrder.find((cartItem) => cartItem.id === itemId);
+                    const previousQuantity = previousItem ? Number(previousItem.quantity || 1) : 0;
 
-                    showToast("Добавлено в корзину");
+                    addToCart(buildCartProduct(item, priceTier));
+                    showToast("Добавлено в корзину", {
+                      actionLabel: "Отмена",
+                      duration: 4200,
+                      onAction: () => {
+                        if (previousQuantity <= 0) {
+                          removeItem(itemId);
+                          return;
+                        }
+
+                        setQuantity(itemId, previousQuantity);
+                      }
+                    });
                   }}
                 >
                   +
                 </button>
-              </td> */}
+              </td>
 
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>

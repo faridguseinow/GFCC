@@ -1,24 +1,8 @@
 :root {
-  --f-light: "Light";
-  --f-regular: "Regular";
-  --f-bold: "Bold";
-}
-
-/* шрифты */
-
-@font-face {
-  font-family: "Bold";
-  src: url("./assets/fonts/Onest-Bold.ttf") format("opentype");
-}
-
-@font-face {
-  font-family: "Light";
-  src: url("./assets/fonts/Onest-Light.ttf") format("opentype");
-}
-
-@font-face {
-  font-family: "Regular";
-  src: url("./assets/fonts/Onest-Regular.ttf") format("opentype");
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --f-light: var(--font-ui);
+  --f-regular: var(--font-ui);
+  --f-bold: var(--font-ui);
 }
 
 /* базовая структура */
@@ -34,6 +18,7 @@ body {
   height: 100%;
   width: 100%;
   font-family: var(--f-regular);
+  font-weight: 400;
   color: var(--text);
   padding-top: 0;
 }
@@ -42,18 +27,21 @@ h1 {
   font-size: 24px;
   color: var(--text);
   font-family: var(--f-bold);
+  font-weight: 700;
 }
 
 h2 {
   font-size: 18px;
   color: var(--text);
   font-family: var(--f-bold);
+  font-weight: 700;
 }
 
 h3 {
   font-size: 16px;
   color: var(--text);
   font-family: var(--f-bold);
+  font-weight: 700;
 }
 
 p,
@@ -61,7 +49,7 @@ span {
   font-size: 16px;
   line-height: 1.3;
   font-family: var(--f-regular);
-  color: var(--text);
+  font-weight: 400;
 }
 
 
@@ -71,49 +59,66 @@ select {
   font-size: 16px;
 }
 
-// // toast
+.toast-overlay {
+  position: fixed;
+  top: calc(var(--safe-top) + 12px);
+  left: 50%;
+  width: min(calc(100% - 28px), 520px);
+  transform: translateX(-50%);
+  z-index: 20000;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+}
 
-// .toast-overlay {
-//   max-width: 90%;
-//   width: max-content;
-//   text-align: center;
-//   position: fixed;
-//   bottom: calc(110px + env(safe-area-inset-bottom));
-//   left: 50%;
-//   transform: translate(-50%, 0);
-//   z-index: 999999;
-//   pointer-events: none;
-// }
+.toast {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.35;
+  font-weight: 600;
+  color: #fff !important; ;
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--color-primary) 92%, white 8%),
+      color-mix(in srgb, var(--color-primary) 68%, #1a1a1a 32%));
+  animation: toastDropIn 0.28s ease;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
 
-// .toast {
-//   padding: 10px 16px;
-//   border-radius: 16px;
-//   font-size: 16px;
-//   font-weight: 500;
-//   background: var(--color-primary);
-//   color: var(--glass-bg);
-//   box-shadow: var(--shadow);
-//   animation: toastIn 0.25s ease, toastOut 0.25s ease 1.75s forwards;
-// }
+.toast-text {
+  min-width: 0;
+  flex: 1 1 auto;
+}
 
-// @keyframes toastIn {
-//   from {
-//     transform: translateY(20px);
-//     opacity: 0;
-//   }
+.toast-action {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
 
-//   to {
-//     transform: translateY(0);
-//     opacity: 1;
-//   }
-// }
+@keyframes toastDropIn {
+  from {
+    transform: translateY(-18px);
+    opacity: 0;
+  }
 
-// @keyframes toastOut {
-//   to {
-//     transform: translateY(20px);
-//     opacity: 0;
-//   }
-// }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
 
 body {
   transition:
@@ -148,7 +153,7 @@ body.theme-blur {
   position: relative;
   border-radius: 16px;
   background: var(--glass-bg);
-  box-shadow: 0 6px 20px var(--shadow);
+  border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
   transition: 0.3s ease;
 }
 
@@ -191,6 +196,10 @@ body.theme-blur {
 
 @media (prefers-reduced-motion: reduce) {
   .route-shell-animate {
+    animation: none;
+  }
+
+  .toast {
     animation: none;
   }
 }

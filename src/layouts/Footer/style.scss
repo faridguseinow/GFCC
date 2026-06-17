@@ -7,7 +7,6 @@
   padding-bottom: env(safe-area-inset-bottom);
   background: var(--bg-color);
   border-top: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
-  box-shadow: none;
   z-index: 10000;
 
   display: flex;
@@ -46,7 +45,7 @@
   }
 
   &:active {
-    color: var(--color-primary);
+
   }
 
   span {
@@ -57,21 +56,72 @@
   }
 }
 
+.nav-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
 .nav-button.active {
   color: var(--color-primary);
   transform: none;
 }
 
-.nav-button:active {
-  transform: scale(0.97);
+.cart-button {
+  .cart-icon {
+    width: 40px;
+    height: 40px;
+    transform: translateY(-3px);
+    background: var(--bg-color);
+    border-radius: 9999px;
+    border: 1.5px solid color-mix(in srgb, var(--text) 30%, transparent);
+    color: color-mix(in srgb, var(--text) 42%, transparent);
+  }
+
+  svg {
+    width: 21px;
+    height: 21px;
+    fill: currentColor;
+    stroke: currentColor;
+  }
+
+  &.active {
+
+
+    .nav-icon {
+      border: 1.5px solid color-mix(in srgb, var(--color-primary) 58%, white 42%);
+      color: color-mix(in srgb, var(--color-primary) 86%, white 14%);
+    }
+  }
+
+  &:focus-visible .nav-icon {
+    background: var(--bg-color);
+    border: 1.5px solid color-mix(in srgb, var(--color-primary) 58%, white 42%);
+    color: color-mix(in srgb, var(--color-primary) 86%, white 14%);
+  }
+
+  span:last-child {
+    color: currentColor;
+    font-weight: 600;
+  }
 }
+
+
 
 .badge {
   position: absolute;
-  top: 6px;
-  right: calc(50% - 16px);
+  z-index: 1;
+  top: 4px;
+  right: calc(50% - 18px);
   width: 8px;
   height: 8px;
   background: red;
   border-radius: 50%;
+  border: 1px solid var(--bg-color);
 }

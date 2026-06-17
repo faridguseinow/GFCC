@@ -36,6 +36,14 @@
   background: var(--shadow);
 }
 
+.price-table tr.selected-row {
+  background: color-mix(in srgb, var(--text) 10%, var(--bg-color) 90%);
+}
+
+.price-table tr.selected-row td {
+  background: transparent;
+}
+
 .price-table td:first-child {
   white-space: normal;
   word-break: break-word;
@@ -53,4 +61,10 @@
   border-radius: 8px;
   background: var(--color-primary);
   color: white;
+}
+
+.add-btn.selected-btn {
+  background: color-mix(in srgb, var(--text) 22%, var(--bg-color) 78%);
+  color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
 }

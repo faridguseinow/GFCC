@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import PriceList from "../../components/PriceList";
 import NavListItem from "../../components/NavListItem";
+import PriceTierSelector from "../../components/PriceTierSelector";
+import { usePriceTier } from "../../context/PriceTierContext";
 import * as XLSX from "xlsx";
 import "./style.scss";
 
@@ -9,6 +11,11 @@ import {
   priceCategoriesConfig,
   DEFAULT_CATEGORY_ICON
 } from "../../config/priceCategories";
+import {
+  getPriceTierExcelTitle,
+  getPriceTierSubtitle,
+  resolvePriceByTier
+} from "../../utils/priceTier";
 
 const normalizeCategory = (value) => {
   if (!value) return "";
@@ -20,15 +27,16 @@ const normalizeCategory = (value) => {
 };
 
 export default function Price() {
-
   const [isDesktop, setIsDesktop] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const selectedCategory = searchParams.get("category");
+  const { priceTier } = usePriceTier();
 
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [priceTierSelectorOpen, setPriceTierSelectorOpen] = useState(false);
 
   const handleExport = () => {
 
@@ -56,7 +64,7 @@ export default function Price() {
 
     XLSX.utils.sheet_add_aoa(worksheet, [
       ["ПРАЙС ЛИСТ GFCC"],
-      [`ЦЕНЫ ДЛЯ ЧАСТНЫХ ЛИЦ НА ${today}`],
+      [`${getPriceTierExcelTitle(priceTier)} НА ${today}`],
       [],
       ["КАТЕГОРИЯ", "НАИМЕНОВАНИЕ", "ЦЕНА"]
     ], { origin: "A1" });
@@ -64,7 +72,7 @@ export default function Price() {
     const rows = sorted.map(item => [
       (item.category || '').toUpperCase(),
       (item.name || '').toUpperCase(),
-      item.extraPrice ?? item.price ?? item.cost ?? ''
+      resolvePriceByTier(item, priceTier) ?? ""
     ]);
 
     XLSX.utils.sheet_add_aoa(worksheet, rows, { origin: -1 });
@@ -82,7 +90,7 @@ export default function Price() {
 
     XLSX.utils.book_append_sheet(workbook, worksheet, "ПРАЙС");
 
-    XLSX.writeFile(workbook, `GFCC_Price_${today}.xlsx`);
+    XLSX.writeFile(workbook, `GFCC_${priceTier}_prices_${today}.xlsx`);
   };
 
 
@@ -164,11 +172,32 @@ export default function Price() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
+
+              <button
+                type="button"
+                className="price-settings-btn"
+                onClick={() => setPriceTierSelectorOpen(true)}
+                aria-label="Выбрать тип цены"
+              >
+                <span className="price-settings-glyph" aria-hidden="true">₽</span>
+              </button>
             </>
           ) : (
             <>
-              <h2>Прайс-лист Gold и Oasis</h2>
-              <p>Цены для частных лиц (оптовые + 5%)</p>
+              <div className="title-row">
+                <h2>Прайс-лист Gold и Oasis</h2>
+
+                <button
+                  type="button"
+                  className="price-settings-btn"
+                  onClick={() => setPriceTierSelectorOpen(true)}
+                  aria-label="Выбрать тип цены"
+                >
+                  <span className="price-settings-glyph" aria-hidden="true">₽</span>
+                </button>
+              </div>
+
+              <p>{getPriceTierSubtitle(priceTier)}</p>
 
               <div className="header-controls">
                 <input
@@ -225,6 +254,11 @@ export default function Price() {
         )}
 
       </div>
+
+      <PriceTierSelector
+        isOpen={priceTierSelectorOpen}
+        onClose={() => setPriceTierSelectorOpen(false)}
+      />
     </div>
   );
 }

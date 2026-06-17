@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react';
 import { AliveScope, KeepAlive } from 'react-activation';
 
 import { CartProvider } from "./context/CartContext";
+import { PriceTierProvider } from "./context/PriceTierContext";
 import { ToastProvider } from "./context/ToastContext";
 import { ThemeProvider } from "./context/ThemeContext";
 
@@ -57,13 +58,10 @@ function ScrollHandler() {
 }
 
 function App() {
-  const [appReady, setAppReady] = useState(false);
   const [welcomeVisible, setWelcomeVisible] = useState(true);
   const [routeAnimating, setRouteAnimating] = useState(false);
 
   const handleWelcomeReady = async () => {
-    setAppReady(true);
-
     if (Capacitor.isNativePlatform()) {
       await SplashScreen.hide();
     }
@@ -104,7 +102,7 @@ function App() {
     return () => {
       listener.then(l => l.remove());
     };
-  }, [location]);
+  }, [location, navigate]);
 
   useEffect(() => {
     const standalone =
@@ -138,69 +136,71 @@ function App() {
   return (
     <ThemeProvider>
       <div className="app-container">
-        <CartProvider>
-          <ToastProvider>
+        <PriceTierProvider>
+          <CartProvider>
+            <ToastProvider>
 
-            {welcomeVisible ? (
-              <WelcomeScreen
-                onFinish={() => setWelcomeVisible(false)}
-                onReady={handleWelcomeReady}
-              />
-            ) : (
-              <>
-                {!isInstalled && <PWAInstallBanner />}
+              {welcomeVisible ? (
+                <WelcomeScreen
+                  onFinish={() => setWelcomeVisible(false)}
+                  onReady={handleWelcomeReady}
+                />
+              ) : (
+                <>
+                  {!isInstalled && <PWAInstallBanner />}
 
-                <ScrollHandler />
+                  <ScrollHandler />
 
-                <div className={`route-shell ${routeAnimating ? "route-shell-animate" : ""}`}>
-                  <AliveScope>
-                    <Routes>
-                      <Route
-                        path="/"
-                        element={
-                          <KeepAlive cacheKey="home">
-                            <Home />
-                          </KeepAlive>
-                        }
-                      />
+                  <div className={`route-shell ${routeAnimating ? "route-shell-animate" : ""}`}>
+                    <AliveScope>
+                      <Routes>
+                        <Route
+                          path="/"
+                          element={
+                            <KeepAlive cacheKey="home">
+                              <Home />
+                            </KeepAlive>
+                          }
+                        />
 
-                      <Route
-                        path="/product/:id"
-                        element={
-                          <KeepAlive cacheKey="product">
-                            <ProductPage />
-                          </KeepAlive>
-                        }
-                      />
+                        <Route
+                          path="/product/:id"
+                          element={
+                            <KeepAlive cacheKey="product">
+                              <ProductPage />
+                            </KeepAlive>
+                          }
+                        />
 
 
-                      <Route path="/contacts" element={<Contacts />} />
-                      <Route
-                        path="/price"
-                        element={
-                          <KeepAlive cacheKey="price">
-                            <Price />
-                          </KeepAlive>
-                        }
-                      />
-                      <Route path="/cart" element={<Cart />} />
-                      <Route path="/others" element={<Others />} />
-                      <Route path="/others/converter" element={<ConverterPage />} />
-                      <Route path="/others/warehouse" element={<WarehousePage />} />
-                      <Route path="/others/faq" element={<FAQPage />} />
-                      <Route path="/others/privacy" element={<Privacy />} />
-                      <Route path="/others/terms" element={<Terms />} />
-                      <Route path="*" element={<Navigate to="/" replace />} />
-                    </Routes>
-                  </AliveScope>
-                </div>
+                        <Route path="/contacts" element={<Contacts />} />
+                        <Route
+                          path="/price"
+                          element={
+                            <KeepAlive cacheKey="price">
+                              <Price />
+                            </KeepAlive>
+                          }
+                        />
+                        <Route path="/cart" element={<Cart />} />
+                        <Route path="/others" element={<Others />} />
+                        <Route path="/others/converter" element={<ConverterPage />} />
+                        <Route path="/others/warehouse" element={<WarehousePage />} />
+                        <Route path="/others/faq" element={<FAQPage />} />
+                        <Route path="/others/privacy" element={<Privacy />} />
+                        <Route path="/others/terms" element={<Terms />} />
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                      </Routes>
+                    </AliveScope>
+                  </div>
 
-                {!keyboardOpen && <Footer />}
-              </>
-            )}
+                  {!keyboardOpen && <Footer />}
+                </>
+              )}
 
-          </ToastProvider>
-        </CartProvider>
+            </ToastProvider>
+          </CartProvider>
+        </PriceTierProvider>
       </div>
     </ThemeProvider>
   );

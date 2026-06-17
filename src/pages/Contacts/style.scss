@@ -19,6 +19,7 @@
 
     border-radius: 999px;
     background: rgba(120, 120, 120, 0.15);
+    border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
     backdrop-filter: blur(20px);
 
     z-index: 100;
@@ -36,10 +37,6 @@
 
       border-radius: 999px;
       background: var(--bg-color);
-
-      box-shadow:
-        0 2px 6px rgba(0, 0, 0, 0.12),
-        inset 0 0 0 0.5px rgba(255, 255, 255, 0.6);
 
       transition: transform 0.32s cubic-bezier(.4, 0, .2, 1);
 
@@ -112,11 +109,11 @@
     .contact-card {
       background: var(--glass-bg);
       border-radius: 16px;
+      border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
       padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 8px;
-      box-shadow: 0 10px 30px var(--shadow);
       transition: 0.25s ease;
 
     }
@@ -160,8 +157,9 @@
 
     .tg-btn {
       width: 32px;
-      height: 24px;
+      height: 32px;
       border-radius: 8px;
+      border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -187,8 +185,7 @@
       padding: 16px;
       border-radius: 32px;
       background: var(--glass-bg);
-      box-shadow:
-        0 20px 60px var(--shadow);
+      border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
       display: flex;
       flex-direction: column;
       gap: 28px;
@@ -210,12 +207,11 @@
         height: 52px;
         border-radius: 50%;
         background: var(--bg-color);
+        border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
         display: flex;
         align-items: center;
         justify-content: center;
         transition: 0.3s ease;
-        box-shadow:
-          0 6px 18px var(--shadow);
 
         img {
           width: 30px;
@@ -224,8 +220,6 @@
 
         &:hover {
           transform: translateY(-6px);
-          box-shadow:
-            0 14px 35px var(--shadow);
         }
 
         &:active {

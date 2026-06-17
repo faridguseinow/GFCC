@@ -1,6 +1,110 @@
+/* eslint-disable react/prop-types, react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from "react";
+import { normalizePriceTier, PRICE_TIERS } from "../utils/priceTier";
 
 const CartContext = createContext();
+
+const STORAGE_KEY = "gfcc_cart";
+const HISTORY_LIMIT = 10;
+
+const toText = (value) => (value === null || value === undefined ? "" : String(value).trim());
+
+const normalizeQuantity = (value, fallback = 1) => {
+    const numeric = Number(value);
+
+    if (!Number.isFinite(numeric) || numeric <= 0) {
+        return fallback;
+    }
+
+    return Math.max(1, Math.floor(numeric));
+};
+
+const normalizeOptionalPrice = (value) => {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric : null;
+};
+
+const resolveLegacyPrice = (item) => {
+    const candidates = [
+        item?.legacyPrice,
+        item?.price,
+        item?.cost,
+        item?.extraPrice,
+        item?.wholesalePrice,
+        item?.retailPrice
+    ];
+
+    for (const candidate of candidates) {
+        const numeric = normalizeOptionalPrice(candidate);
+        if (numeric !== null) {
+            return numeric;
+        }
+    }
+
+    return 0;
+};
+
+const buildFallbackId = (item, index = 0) => {
+    const safeName = toText(item?.name).toLowerCase().replace(/\s+/g, "-") || "item";
+    const safePrice = resolveLegacyPrice(item);
+    return `${safeName}-${safePrice}-${index}`;
+};
+
+const normalizeCartItem = (item, index = 0) => ({
+    id: toText(item?.id) || buildFallbackId(item, index),
+    name: toText(item?.name) || "Товар",
+    price: resolveLegacyPrice(item),
+    legacyPrice: resolveLegacyPrice(item),
+    wholesalePrice: normalizeOptionalPrice(item?.wholesalePrice),
+    extraPrice: normalizeOptionalPrice(item?.extraPrice ?? item?.price),
+    retailPrice: normalizeOptionalPrice(item?.retailPrice),
+    addedAtPriceTier: normalizePriceTier(item?.addedAtPriceTier || PRICE_TIERS.EXTRA),
+    quantity: normalizeQuantity(item?.quantity)
+});
+
+const normalizeCartItems = (items = []) =>
+    Array.isArray(items)
+        ? items.map((item, index) => normalizeCartItem(item, index))
+        : [];
+
+const normalizeHistoryOrder = (order, index = 0) => ({
+    id: order?.id || Date.now() + index,
+    createdAt: order?.createdAt || order?.date || new Date().toISOString(),
+    clientName: toText(order?.clientName),
+    clientCode: toText(order?.clientCode),
+    clientSklad: toText(order?.clientSklad),
+    comment: toText(order?.comment),
+    priceTier: normalizePriceTier(order?.priceTier || PRICE_TIERS.EXTRA),
+    items: Array.isArray(order?.items)
+        ? order.items.map((item, itemIndex) => ({
+            ...normalizeCartItem(item, itemIndex),
+            name: toText(item?.name) || "Товар",
+            quantity: normalizeQuantity(item?.quantity)
+        }))
+        : []
+});
+
+const readCartStorage = () => {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) {
+            return { activeOrder: [], history: [] };
+        }
+
+        const parsed = JSON.parse(saved);
+
+        return {
+            activeOrder: Array.isArray(parsed?.activeOrder)
+                ? parsed.activeOrder.map((item, index) => normalizeCartItem(item, index))
+                : [],
+            history: Array.isArray(parsed?.history)
+                ? parsed.history.map((order, index) => normalizeHistoryOrder(order, index))
+                : []
+        };
+    } catch {
+        return { activeOrder: [], history: [] };
+    }
+};
 
 export function CartProvider({ children }) {
     const [activeOrder, setActiveOrder] = useState([]);
@@ -8,36 +112,38 @@ export function CartProvider({ children }) {
 
     /* ===== ЗАГРУЗКА ===== */
     useEffect(() => {
-        const saved = localStorage.getItem("gfcc_cart");
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            setActiveOrder(parsed.activeOrder || []);
-            setHistory(parsed.history || []);
-        }
+        const savedState = readCartStorage();
+        setActiveOrder(savedState.activeOrder);
+        setHistory(savedState.history);
     }, []);
 
     /* ===== СОХРАНЕНИЕ ===== */
     useEffect(() => {
-        localStorage.setItem(
-            "gfcc_cart",
-            JSON.stringify({ activeOrder, history })
-        );
+        try {
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify({ activeOrder, history })
+            );
+        } catch {
+            // ignore storage errors
+        }
     }, [activeOrder, history]);
 
     /* ===== ДОБАВИТЬ ТОВАР ===== */
     const addToCart = (product) => {
         setActiveOrder(prev => {
-            const existing = prev.find(p => p.id === product.id);
+            const normalizedProduct = normalizeCartItem(product, prev.length);
+            const existing = prev.find(p => p.id === normalizedProduct.id);
 
             if (existing) {
                 return prev.map(p =>
-                    p.id === product.id
-                        ? { ...p, quantity: p.quantity + 1 }
+                    p.id === normalizedProduct.id
+                        ? { ...p, quantity: normalizeQuantity(p.quantity + 1) }
                         : p
                 );
             }
 
-            return [...prev, { ...product, quantity: 1 }];
+            return [...prev, normalizedProduct];
         });
     };
 
@@ -47,7 +153,12 @@ export function CartProvider({ children }) {
             prev
                 .map(item =>
                     item.id === id
-                        ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+                        ? {
+                            ...item,
+                            quantity: normalizeQuantity(
+                                Number(item.quantity || 1) + Number(delta || 0)
+                            )
+                        }
                         : item
                 )
         );
@@ -63,7 +174,7 @@ export function CartProvider({ children }) {
                         quantity:
                             value === ""
                                 ? ""
-                                : Math.max(1, Number(value))
+                                : normalizeQuantity(value)
                     }
                     : item
             )
@@ -77,7 +188,7 @@ export function CartProvider({ children }) {
 
     /* ===== РЕДАКТИРОВАТЬ ИЗ ИСТОРИИ ===== */
     const editHistory = (order) => {
-        setActiveOrder(order.items);
+        setActiveOrder(normalizeCartItems(order?.items));
     };
 
     /* ===== УДАЛИТЬ ===== */
@@ -85,41 +196,33 @@ export function CartProvider({ children }) {
         setActiveOrder(prev => prev.filter(p => p.id !== id));
     };
 
-    /* ===== СФОРМИРОВАТЬ ЗАКАЗ ===== */
-    const finalizeOrder = () => {
-        if (!activeOrder.length) return;
-
-        const total = activeOrder.reduce(
-            (acc, i) => acc + i.price * i.quantity,
-            0
-        );
-
-        const newOrder = {
-            id: Date.now(),
-            date: new Date().toLocaleDateString("ru-RU"),
-            items: activeOrder,
-            total,
-        };
-
-        setHistory(prev => [newOrder, ...prev].slice(0, 5));
+    const clearCart = () => {
         setActiveOrder([]);
-
-        copyOrder(newOrder);
     };
 
-    /* ===== КОПИРОВАНИЕ ===== */
-    const copyOrder = (order) => {
-        const text = `
-Заказ от ${order.date}
+    const restoreCart = (items) => {
+        setActiveOrder(normalizeCartItems(items));
+    };
 
-${order.items
-                .map(i => `${i.name} — ${i.quantity} шт`)
-                .join("\n")}
+    const restoreRemovedItem = (item, index = 0) => {
+        const normalizedItem = normalizeCartItem(item, index);
 
-ИТОГО: ${order.total.toLocaleString("ru-RU")} ₽
-`;
+        setActiveOrder(prev => {
+            if (prev.some((cartItem) => cartItem.id === normalizedItem.id)) {
+                return prev;
+            }
 
-        navigator.clipboard.writeText(text);
+            const safeIndex = Math.min(Math.max(0, index), prev.length);
+            const next = [...prev];
+            next.splice(safeIndex, 0, normalizedItem);
+            return next;
+        });
+    };
+
+    const saveOrderToHistory = (order) => {
+        const normalizedOrder = normalizeHistoryOrder(order);
+
+        setHistory(prev => [normalizedOrder, ...prev].slice(0, HISTORY_LIMIT));
     };
 
     return (
@@ -130,11 +233,13 @@ ${order.items
                 addToCart,
                 updateQuantity,
                 removeItem,
-                finalizeOrder,
                 setQuantity,
                 deleteHistory,
                 editHistory,
-                copyOrder,
+                clearCart,
+                restoreCart,
+                restoreRemovedItem,
+                saveOrderToHistory,
             }}
         >
             {children}

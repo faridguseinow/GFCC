@@ -212,7 +212,6 @@ export const contactsData = {
           {
             label: '8 (903) 240 88 89',
             number: '89032408889',
-            telegram: 'https://t.me/+79031968889',
             telegram: 'https://t.me/+79032408889'
           }
         ]
