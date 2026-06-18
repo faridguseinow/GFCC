@@ -123,6 +123,11 @@ const isValidCartItem = (item) => {
   return Boolean(name && quantity > 0);
 };
 
+const buildShareTitle = (clientName) => {
+  const safeClientName = toText(clientName) || "клиента";
+  return `Заказ ${safeClientName}`;
+};
+
 export default function Cart() {
   const modalRoot = typeof document !== "undefined"
     ? document.getElementById("modal-root")
@@ -286,12 +291,24 @@ export default function Cart() {
     }
   };
 
-  const handlePreparedDownload = () => {
+  const handlePreparedDownload = async () => {
     if (!preparedOrder) {
       return;
     }
 
-    downloadPdfBlob(preparedOrder.blob, preparedOrder.fileName);
+    try {
+      const result = await downloadPdfBlob(preparedOrder.blob, preparedOrder.fileName);
+
+      if (result?.native) {
+        showToast(
+          result.publicLocation
+            ? "PDF сохранён в документы устройства"
+            : "PDF сохранён во внутреннее хранилище приложения"
+        );
+      }
+    } catch {
+      showToast("Не удалось сохранить PDF");
+    }
   };
 
   const handlePreparedShare = async () => {
@@ -299,13 +316,20 @@ export default function Cart() {
       return;
     }
 
-    if (!preparedOrder.file || !canSharePdfFile(preparedOrder.file)) {
+    const shareAvailable = await canSharePdfFile(preparedOrder.file);
+
+    if (!shareAvailable) {
       showToast(SHARE_FALLBACK_MESSAGE);
       return;
     }
 
     try {
-      await sharePdfFile(preparedOrder.file, "Заказ GFCC");
+      await sharePdfFile({
+        file: preparedOrder.file,
+        blob: preparedOrder.blob,
+        fileName: preparedOrder.fileName,
+        title: buildShareTitle(preparedOrder.order?.clientName)
+      });
     } catch (error) {
       if (error?.name !== "AbortError") {
         showToast(SHARE_FALLBACK_MESSAGE);
@@ -314,24 +338,41 @@ export default function Cart() {
   };
 
   const handleHistoryDownload = async (order) => {
-    const blob = await buildOrderPdfBlob(order);
-    const fileName = buildOrderFileName(order);
+    try {
+      const blob = await buildOrderPdfBlob(order);
+      const fileName = buildOrderFileName(order);
+      const result = await downloadPdfBlob(blob, fileName);
 
-    downloadPdfBlob(blob, fileName);
+      if (result?.native) {
+        showToast(
+          result.publicLocation
+            ? "PDF сохранён в документы устройства"
+            : "PDF сохранён во внутреннее хранилище приложения"
+        );
+      }
+    } catch {
+      showToast("Не удалось сохранить PDF");
+    }
   };
 
   const handleHistoryShare = async (order) => {
-    const blob = await buildOrderPdfBlob(order);
-    const fileName = buildOrderFileName(order);
-    const file = buildPdfFile(blob, fileName);
-
-    if (!file || !canSharePdfFile(file)) {
-      showToast(SHARE_FALLBACK_MESSAGE);
-      return;
-    }
-
     try {
-      await sharePdfFile(file, "Заказ GFCC");
+      const blob = await buildOrderPdfBlob(order);
+      const fileName = buildOrderFileName(order);
+      const file = buildPdfFile(blob, fileName);
+      const shareAvailable = await canSharePdfFile(file);
+
+      if (!shareAvailable) {
+        showToast(SHARE_FALLBACK_MESSAGE);
+        return;
+      }
+
+      await sharePdfFile({
+        file,
+        blob,
+        fileName,
+        title: buildShareTitle(order?.clientName)
+      });
     } catch (error) {
       if (error?.name !== "AbortError") {
         showToast(SHARE_FALLBACK_MESSAGE);

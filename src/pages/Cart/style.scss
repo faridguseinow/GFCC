@@ -155,8 +155,6 @@
             transition: transform 0.2s ease, opacity 0.2s ease;
             touch-action: pan-y;
 
-            &.is-swiping {}
-
             &.is-removing {
                 opacity: 0;
                 pointer-events: none;
