@@ -155,7 +155,7 @@ export default function Cart() {
   const [priceTierSelectorOpen, setPriceTierSelectorOpen] = useState(false);
   const [swipeOffsets, setSwipeOffsets] = useState({});
   const [removingItemIds, setRemovingItemIds] = useState({});
-  const { priceTier } = usePriceTier();
+  const { priceTier, hasClientCard } = usePriceTier();
 
   useEffect(() => {
     setActiveClient(getActiveClient());
@@ -476,17 +476,19 @@ export default function Cart() {
   };
 
   return (
-    <div className="cart-page">
+    <div className={`cart-page ${hasClientCard ? "" : "cart-page-locked"}`}>
 
       <div className="cart-page-header">
         <div className="cart-header-copy">
           <h1>Корзина</h1>
           <p className="client-caption">
-            {toText(activeClient?.name) || "Клиент GFCC"}
+            {toText(activeClient?.name) || "Карта клиента не подключена"}
           </p>
-          <p className="client-tier">
-            {getPriceTierLabel(priceTier)}
-          </p>
+          {hasClientCard && (
+            <p className="client-tier">
+              {getPriceTierLabel(priceTier)}
+            </p>
+          )}
         </div>
 
         <div className="header-actions">
@@ -520,7 +522,15 @@ export default function Cart() {
         </div>
       </div>
 
-      {activeOrder.length > 0 ? (
+      {!hasClientCard ? (
+        <div className="cart-locked-card glass">
+          <strong>Функции корзины доступны зарегистрированным клиентам</strong>
+          <p>
+            Корзина, формирование заказов и отправка по отделам доступны для клиентов
+            Golden Flowers или Oasis Flowers с активной картой клиента.
+          </p>
+        </div>
+      ) : activeOrder.length > 0 ? (
         <div className="active-order">
           {activeOrder.map((item) => (
             <div key={item.id} className="cart-item-track">
@@ -637,7 +647,7 @@ export default function Cart() {
 
         </div>
       ) : (
-        <p className="no-orders glass">Нет активного заказа</p>
+        <p className="no-orders glass">Нет активного заказа. <br />Добавьте товары из прайса в корзину.</p>
       )}
 
       {preparedOrder && (
@@ -744,7 +754,7 @@ export default function Cart() {
 
       {modalRoot && historyOpen && createPortal(
         <div
-          className="cart-sheet-backdrop"
+          className="cart-sheet-backdrop centered-backdrop"
           onClick={() => setHistoryOpen(false)}
         >
           <div
@@ -753,7 +763,11 @@ export default function Cart() {
           >
             <div className="sheet-header">
               <div>
+                <div className="sheet-badge">История</div>
                 <h2>История заказов</h2>
+                <p className="sheet-description">
+                  Здесь хранятся последние сформированные заказы. Их можно снова скачать, отправить или удалить.
+                </p>
               </div>
 
               <button
@@ -813,6 +827,14 @@ export default function Cart() {
                 </div>
               ))}
             </div>
+
+            <button
+              type="button"
+              className="sheet-action"
+              onClick={() => setHistoryOpen(false)}
+            >
+              Закрыть
+            </button>
           </div>
         </div>,
         modalRoot

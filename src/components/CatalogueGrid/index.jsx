@@ -179,11 +179,6 @@ export default function CatalogueGrid({
             )}
 
             <div className="catalogue-modal-content">
-              {currentTitle && (
-                <div className="catalogue-modal-section">
-                  {currentTitle}
-                </div>
-              )}
 
               <div className="catalogue-modal-category">
                 {selectedProduct.category}

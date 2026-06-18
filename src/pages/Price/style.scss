@@ -3,14 +3,16 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  --price-products-header-offset: calc(62px + var(--safe-top));
 }
 
 .price-page>.sticky-header {
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 50%;
-  width: min(100%, 768px);
-  transform: translateX(-50%);
+  left: auto;
+  width: 100%;
+  max-width: 768px;
+  margin: 0 auto;
   z-index: 1000;
   background: var(--bg-color);
 }
@@ -122,16 +124,8 @@
 
 .price-scroll-container {
   flex: 1;
-  overflow-y: auto;
+  overflow: visible;
   padding-bottom: var(--page-bottom-space);
-}
-
-.price-page>.sticky-header:not(.main-header)+.price-scroll-container {
-  margin-top: calc(60px + var(--safe-top));
-}
-
-.price-page>.sticky-header.main-header+.price-scroll-container {
-  margin-top: 145px;
 }
 
 @media (max-width: 1024px) {
@@ -158,11 +152,7 @@
     }
   }
 
-  .price-page>.sticky-header:not(.main-header)+.price-scroll-container {
-    margin-top: calc(60px + var(--safe-top));
-  }
-
-  .price-page>.sticky-header.main-header+.price-scroll-container {
-    margin-top: 145px;
+  .price-page {
+    --price-products-header-offset: calc(62px + var(--safe-top));
   }
 }

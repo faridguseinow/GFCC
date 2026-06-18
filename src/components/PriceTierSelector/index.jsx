@@ -51,9 +51,10 @@ export default function PriceTierSelector({ isOpen, onClose }) {
         aria-labelledby="price-tier-title"
       >
         <div className="price-tier-head">
-          <div>
-            <div className="price-tier-label">Настройка</div>
+          <div className="price-tier-head-copy">
+            <div className="price-tier-badge">Настройка</div>
             <h2 id="price-tier-title">Тип цены</h2>
+            <p>Выберите единый тип цены для прайс-листа, корзины и экспорта.</p>
           </div>
 
           <button

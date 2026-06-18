@@ -81,7 +81,7 @@
 }
 
 .catalogue-section-card {
-  border-radius: 24px;
+  border-radius: 16px;
   overflow: hidden;
   transition: transform 0.24s ease;
 
@@ -160,13 +160,13 @@
   flex: 0 0 42px;
   width: 42px;
   height: 42px;
-  border-radius: 14px;
+  border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--icon-bg);
   color: var(--icon-color);
-  font-size: 28px;
+  font-size: 29px;
   line-height: 1;
   transition: transform 0.24s ease;
 

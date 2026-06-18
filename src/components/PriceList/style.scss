@@ -12,13 +12,14 @@
 
 .price-table th {
   position: sticky;
-  top: 0;
+  top: var(--price-products-header-offset, calc(62px + var(--safe-top)));
   background: var(--bg-color);
   padding: 10px 16px;
   font-weight: 600;
   text-align: left;
   border-bottom: 1px solid var(--shadow);
-    font-family: var(--f-bold);
+  font-family: var(--f-bold);
+  z-index: 20;
 }
 
 .price-table td {
