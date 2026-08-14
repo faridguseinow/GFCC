@@ -20,11 +20,20 @@
 .price-page>.sticky-header:not(.main-header) {
   padding: calc(10px + var(--safe-top)) var(--page-side-padding) 12px;
   border-bottom: 1px solid var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 
   .header-row {
     display: flex;
     align-items: center;
     gap: 12px;
+  }
+
+  .products-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .price-back-btn {
@@ -51,19 +60,37 @@
 
 .price-page>.sticky-header.main-header {
   padding: calc(16px + var(--safe-top)) var(--page-side-padding) 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--shadow);
 
   .categories-header {
     text-align: start;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 
     .title-row {
-      display: flex;
+      display: grid;
+      grid-template-columns: auto 40px;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
+
+      h2 {
+        margin: 0;
+        font-size: 20px;
+        line-height: 1.15;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+
+        span {
+          font-size: 13px;
+          line-height: 1.25;
+          font-family: var(--f-light);
+          font-weight: 500;
+          color: color-mix(in srgb, var(--text) 64%, transparent);
+        }
+      }
     }
 
     p {
@@ -73,6 +100,8 @@
     .header-controls {
       display: flex;
       flex-wrap: nowrap;
+      align-items: center;
+      gap: 12px;
 
       .price-search {
         width: 100%;
@@ -85,13 +114,19 @@
         font-family: var(--f-light);
         font-weight: 300;
         background: var(--shadow);
-        margin-right: 12px;
       }
 
       .export-btn {
-        min-width: 250px;
-        background-color: green;
-        color: azure;
+        min-width: 156px;
+        height: 38px;
+        border: none;
+        border-radius: 12px;
+        background-color: #088029;
+        color: #fff;
+        font-family: var(--f-light);
+        font-size: 14px;
+        font-weight: 700;
+        white-space: nowrap;
       }
     }
 
@@ -100,13 +135,14 @@
 }
 
 .price-settings-btn {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   flex-shrink: 0;
   border: none;
   border-radius: 999px;
   background: var(--icon-bg);
-  color: var(--text);
+  color: var(--color-primary);
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -116,7 +152,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
   font-weight: 700;
   line-height: 1;
   color: var(--color-primary);
@@ -139,14 +174,42 @@
   padding: calc(24px + var(--safe-top)) var(--page-side-padding) 0;
 }
 
+.price-empty-state {
+  margin: 24px var(--page-side-padding) 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--shadow);
+  color: var(--text);
+  font-family: var(--f-light);
+  font-size: 15px;
+  line-height: 1.4;
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   .price-page>.sticky-header.main-header {
     .categories-header {
       gap: 8px;
 
+      .title-row {
+        grid-template-columns: auto 36px;
+        justify-content: space-between;
+        gap: 8px;
+
+        h2 {
+          font-size: 18px;
+        }
+      }
+
       .header-controls {
+        display: block;
+
         .price-search {
           margin-right: 0;
+        }
+
+        .export-btn {
+          display: none;
         }
       }
     }

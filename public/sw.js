@@ -1,3 +1,5 @@
+self.GFCC_SW_VERSION = "1.5.1-boot-reload";
+
 self.addEventListener("install", () => {
   self.skipWaiting();
 });
@@ -6,8 +8,8 @@ self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
     const cacheNames = await caches.keys();
     await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+    await self.clients.claim();
 
-    const registration = await self.registration.unregister();
     const clients = await self.clients.matchAll({
       type: "window",
       includeUncontrolled: true
@@ -15,14 +17,29 @@ self.addEventListener("activate", (event) => {
 
     await Promise.all(
       clients.map((client) => {
-        if ("navigate" in client) {
-          return client.navigate(client.url);
+        if (!("navigate" in client)) {
+          return Promise.resolve();
         }
 
-        return Promise.resolve();
+        const url = new URL(client.url);
+
+        if (url.searchParams.get("gfcc_sw") === self.GFCC_SW_VERSION) {
+          return Promise.resolve();
+        }
+
+        url.searchParams.set("gfcc_sw", self.GFCC_SW_VERSION);
+
+        return client.navigate(url.toString());
       })
     );
-
-    return registration;
   })());
+});
+
+self.addEventListener("fetch", (event) => {
+  if (event.request.mode === "navigate") {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  event.respondWith(fetch(event.request));
 });

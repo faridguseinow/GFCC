@@ -1,6 +1,8 @@
 /* eslint-disable react/prop-types */
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import PriceBaseSwitch from "../PriceBaseSwitch";
+import { usePriceSource } from "../../context/PriceSourceContext";
 import { usePriceTier } from "../../context/PriceTierContext";
 import { PRICE_TIERS } from "../../utils/priceTier";
 import "./style.scss";
@@ -11,10 +13,22 @@ export default function PriceTierSelector({ isOpen, onClose }) {
     : null;
   const portalTarget = modalRoot || (typeof document !== "undefined" ? document.body : null);
   const { availablePriceTiers, hasClientCard, priceTier, setPriceTier } = usePriceTier();
+  const { priceBase, setPriceBase } = usePriceSource();
+  const [draftPriceTier, setDraftPriceTier] = useState(priceTier);
+  const [draftPriceBase, setDraftPriceBase] = useState(priceBase);
 
   useEffect(() => {
     if (!isOpen) {
-      return () => {};
+      return;
+    }
+
+    setDraftPriceTier(priceTier);
+    setDraftPriceBase(priceBase);
+  }, [isOpen, priceBase, priceTier]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return () => { };
     }
 
     const previousOverflow = document.body.style.overflow;
@@ -51,10 +65,8 @@ export default function PriceTierSelector({ isOpen, onClose }) {
         aria-labelledby="price-tier-title"
       >
         <div className="price-tier-head">
-          <div className="price-tier-head-copy">
-            <div className="price-tier-badge">Настройка</div>
-            <h2 id="price-tier-title">Тип цены</h2>
-            <p>Выберите единый тип цены для прайс-листа, корзины и экспорта.</p>
+          <div className="price-tier-head-copy">            <h2 id="price-tier-title">Настройки прайса</h2>
+            <p>Выберите склад и тип цены для прайс-листа, корзины и экспорта.</p>
           </div>
 
           <button
@@ -67,9 +79,21 @@ export default function PriceTierSelector({ isOpen, onClose }) {
           </button>
         </div>
 
+        <div className="price-base-section">
+          <div className="price-base-section-copy">
+            <strong>Цены склада Gold или Oasis</strong>
+            <span>Выберите, какой склад.</span>
+          </div>
+
+          <PriceBaseSwitch
+            value={draftPriceBase}
+            onChange={setDraftPriceBase}
+          />
+        </div>
+
         <div className="price-tier-list">
           {availablePriceTiers.map((tier) => {
-            const isActive = tier.value === priceTier;
+            const isActive = tier.value === draftPriceTier;
             const isWholesaleLocked = tier.value === PRICE_TIERS.WHOLESALE && !hasClientCard;
 
             return (
@@ -82,8 +106,7 @@ export default function PriceTierSelector({ isOpen, onClose }) {
                     return;
                   }
 
-                  setPriceTier(tier.value);
-                  onClose();
+                  setDraftPriceTier(tier.value);
                 }}
                 disabled={!tier.allowed}
               >
@@ -106,6 +129,18 @@ export default function PriceTierSelector({ isOpen, onClose }) {
             );
           })}
         </div>
+
+        <button
+          type="button"
+          className="price-settings-save"
+          onClick={() => {
+            setPriceBase(draftPriceBase);
+            setPriceTier(draftPriceTier);
+            onClose();
+          }}
+        >
+          Сохранить
+        </button>
       </div>
     </div>,
     portalTarget

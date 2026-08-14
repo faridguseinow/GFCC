@@ -258,9 +258,9 @@ export default function Home() {
       {showNotice && (
         <div className="launch-notice glass">
           <div className="notice-content">
-            <ul>GFCC — Версия 1.5.0</ul>
+            <ul>GFCC — Версия 1.5.1</ul>
             <li>
-              Добавлена корзина для быстрого формирования заказов.
+              Добавлен прайс-лист цветочного склада Oasis Flowers как отдельный прайс-лист. Его можно выбрать в настройках прайс-листа.
             </li>
             <li>
               Оптовая цена и функция корзины доступны зарегистрированным клиентам Golden Flowers и Oasis Flowers с активной картой клиента.

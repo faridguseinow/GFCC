@@ -24,6 +24,8 @@ dist-ssr
 *.sw?
 
 # Sensitive files
+.env
+android/app/debug/
 src/data/clients.json.bak
 gfcc-release-key/
 *.jks

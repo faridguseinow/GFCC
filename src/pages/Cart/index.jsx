@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Info } from "lucide-react";
+import { History, Info, Settings } from "lucide-react";
 import PriceTierSelector from "../../components/PriceTierSelector";
 import { useCart } from "../../context/CartContext";
+import { usePriceSource } from "../../context/PriceSourceContext";
 import { usePriceTier } from "../../context/PriceTierContext";
 import { useToast } from "../../context/ToastContext";
 import {
@@ -16,6 +17,7 @@ import {
   sharePdfFile
 } from "../../utils/sharePdf";
 import { getPriceTierLabel, resolvePriceByTier } from "../../utils/priceTier";
+import { getPriceBaseLabel, getPricesApiUrl } from "../../utils/priceBase";
 
 import "./style.scss";
 
@@ -128,6 +130,35 @@ const buildShareTitle = (clientName) => {
   return `Заказ ${safeClientName}`;
 };
 
+const normalizeLookupText = (value) =>
+  toText(value)
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+
+const stripBaseFromId = (value) => {
+  const text = toText(value);
+  const separatorIndex = text.indexOf(":");
+
+  return separatorIndex >= 0 ? text.slice(separatorIndex + 1) : text;
+};
+
+const buildCartItemId = (item, base) =>
+  `${base}:${toText(item?.id) || toText(item?.sourceId) || normalizeLookupText(item?.name)}`;
+
+const mapPriceItemToCartItem = (cartItem, priceItem, base, tier) => ({
+  ...cartItem,
+  id: buildCartItemId(priceItem, base),
+  sourceId: toText(priceItem?.id) || stripBaseFromId(cartItem?.id),
+  name: toText(priceItem?.name) || cartItem.name,
+  priceBase: base,
+  price: resolvePriceByTier(priceItem, tier) ?? cartItem.price,
+  legacyPrice: resolvePriceByTier(priceItem, tier) ?? cartItem.legacyPrice,
+  wholesalePrice: Number.isFinite(Number(priceItem?.wholesalePrice)) ? Number(priceItem.wholesalePrice) : null,
+  extraPrice: Number.isFinite(Number(priceItem?.extraPrice)) ? Number(priceItem.extraPrice) : null,
+  retailPrice: Number.isFinite(Number(priceItem?.retailPrice)) ? Number(priceItem.retailPrice) : null
+});
+
 export default function Cart() {
   const modalRoot = typeof document !== "undefined"
     ? document.getElementById("modal-root")
@@ -155,12 +186,16 @@ export default function Cart() {
   const [comment, setComment] = useState("");
   const [infoOpen, setInfoOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [cartSettingsOpen, setCartSettingsOpen] = useState(false);
   const [preparedOrder, setPreparedOrder] = useState(null);
   const [isPreparing, setIsPreparing] = useState(false);
+  const [cartSyncing, setCartSyncing] = useState(false);
   const [priceTierSelectorOpen, setPriceTierSelectorOpen] = useState(false);
   const [swipeOffsets, setSwipeOffsets] = useState({});
   const [removingItemIds, setRemovingItemIds] = useState({});
   const { priceTier, hasClientCard } = usePriceTier();
+  const { priceBase } = usePriceSource();
+  const lastSyncedBaseRef = useRef(priceBase);
 
   useEffect(() => {
     setActiveClient(getActiveClient());
@@ -171,7 +206,7 @@ export default function Cart() {
   }, []);
 
   useEffect(() => {
-    if (!infoOpen && !historyOpen) {
+    if (!infoOpen && !historyOpen && !cartSettingsOpen) {
       return () => {};
     }
 
@@ -182,6 +217,7 @@ export default function Cart() {
       if (event.key === "Escape") {
         setInfoOpen(false);
         setHistoryOpen(false);
+        setCartSettingsOpen(false);
       }
     };
 
@@ -191,7 +227,103 @@ export default function Cart() {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleEscape);
     };
-  }, [historyOpen, infoOpen]);
+  }, [cartSettingsOpen, historyOpen, infoOpen]);
+
+  useEffect(() => {
+    if (lastSyncedBaseRef.current === priceBase) {
+      return () => {};
+    }
+
+    lastSyncedBaseRef.current = priceBase;
+
+    if (activeOrder.length === 0) {
+      return () => {};
+    }
+
+    const controller = new AbortController();
+    const selectedBase = priceBase;
+
+    setCartSyncing(true);
+
+    fetch(getPricesApiUrl(selectedBase), { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("price-load-failed");
+        }
+
+        return response.json();
+      })
+      .then((priceItems) => {
+        const list = Array.isArray(priceItems) ? priceItems : [];
+        const byId = new Map();
+        const byName = new Map();
+
+        list.forEach((item) => {
+          const itemId = toText(item?.id);
+          const itemName = normalizeLookupText(item?.name);
+
+          if (itemId) {
+            byId.set(itemId, item);
+          }
+
+          if (itemName) {
+            byName.set(itemName, item);
+          }
+        });
+
+        const missingItems = [];
+        const nextItems = activeOrder.map((cartItem) => {
+          const sourceId = stripBaseFromId(cartItem?.sourceId || cartItem?.id);
+          const matchedItem =
+            byId.get(sourceId) ||
+            byName.get(normalizeLookupText(cartItem?.name));
+
+          if (!matchedItem) {
+            missingItems.push(cartItem);
+            return {
+              ...cartItem,
+              priceBase: selectedBase
+            };
+          }
+
+          return mapPriceItemToCartItem(cartItem, matchedItem, selectedBase, priceTier);
+        });
+
+        restoreCart(nextItems);
+
+        if (missingItems.length > 0) {
+          const names = missingItems
+            .slice(0, 3)
+            .map((item) => toText(item?.name))
+            .filter(Boolean)
+            .join(", ");
+          const extraCount = missingItems.length > 3 ? ` и ещё ${missingItems.length - 3}` : "";
+
+          showToast(`В выбранном складе этих товаров нет: ${names}${extraCount}`, {
+            duration: 6500
+          });
+          return;
+        }
+
+        showToast(`Корзина обновлена под ${getPriceBaseLabel(selectedBase)}`);
+      })
+      .catch((error) => {
+        if (error?.name === "AbortError") {
+          return;
+        }
+
+        showToast("Не удалось проверить товары в выбранном складе", {
+          duration: 5200
+        });
+      })
+      .finally(() => {
+        setCartSyncing(false);
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, [activeOrder, priceBase, priceTier, restoreCart, showToast]);
 
   const total = activeOrder.reduce(
     (acc, item) => {
@@ -220,7 +352,8 @@ export default function Cart() {
       wholesalePrice: item?.wholesalePrice,
       extraPrice: item?.extraPrice,
       retailPrice: item?.retailPrice,
-      legacyPrice: item?.legacyPrice
+      legacyPrice: item?.legacyPrice,
+      priceBase: item?.priceBase
     }))
   });
 
@@ -526,8 +659,8 @@ export default function Cart() {
             {toText(activeClient?.name) || "Карта клиента не подключена"}
           </p>
           {hasClientCard && (
-            <p className="client-tier">
-              {getPriceTierLabel(priceTier)}
+            <p className="cart-client-meta">
+              {getPriceBaseLabel(priceBase)}
             </p>
           )}
         </div>
@@ -535,33 +668,20 @@ export default function Cart() {
         <div className="header-actions">
           <button
             type="button"
-            className="header-chip"
-            onClick={() => setHistoryOpen(true)}
-          >
-            История заказов
-          </button>
-
-          <button
-            type="button"
             className="icon-button"
-            onClick={() => setPriceTierSelectorOpen(true)}
-            aria-label="Выбрать тип цены"
+            onClick={() => setCartSettingsOpen(true)}
+            aria-label="Настройки корзины"
           >
-            <span className="price-settings-glyph" aria-hidden="true">₽</span>
-          </button>
-
-          <button
-            type="button"
-            className="icon-button"
-            onClick={() => setInfoOpen(true)}
-            aria-label="Как оформить заказ"
-          >
-            <span className="info-glyph" aria-hidden="true">
-              <Info size={16} strokeWidth={2.2} />
-            </span>
+            <Settings size={20} strokeWidth={2.2} aria-hidden="true" />
           </button>
         </div>
       </div>
+
+      {cartSyncing && (
+        <div className="cart-sync-state">
+          Применяем склад и проверяем товары...
+        </div>
+      )}
 
       {!hasClientCard ? (
         <div className="cart-locked-card glass">
@@ -751,6 +871,86 @@ export default function Cart() {
         onClose={() => setPriceTierSelectorOpen(false)}
       />
 
+      {modalRoot && cartSettingsOpen && createPortal(
+        <div
+          className="cart-sheet-backdrop centered-backdrop"
+          onClick={() => setCartSettingsOpen(false)}
+        >
+          <div
+            className="cart-sheet cart-settings-sheet"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="sheet-header">
+              <div>
+                <h2>Настройки корзины</h2>
+                <p className="sheet-description">
+                  Сейчас выбраны цены склада {getPriceBaseLabel(priceBase)} · {getPriceTierLabel(priceTier)}.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="sheet-close"
+                onClick={() => setCartSettingsOpen(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="cart-settings-actions">
+              <button
+                type="button"
+                onClick={() => {
+                  setCartSettingsOpen(false);
+                  setPriceTierSelectorOpen(true);
+                }}
+              >
+                <span className="settings-action-icon">
+                  <Settings size={18} strokeWidth={2.2} />
+                </span>
+                <span>
+                  <strong>Цены и склад</strong>
+                  <em>{getPriceBaseLabel(priceBase)} · {getPriceTierLabel(priceTier)}</em>
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setCartSettingsOpen(false);
+                  setHistoryOpen(true);
+                }}
+              >
+                <span className="settings-action-icon">
+                  <History size={18} strokeWidth={2.2} />
+                </span>
+                <span>
+                  <strong>История заказов</strong>
+                  <em>Последние сформированные заказы</em>
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setCartSettingsOpen(false);
+                  setInfoOpen(true);
+                }}
+              >
+                <span className="settings-action-icon">
+                  <Info size={18} strokeWidth={2.2} />
+                </span>
+                <span>
+                  <strong>Информация</strong>
+                  <em>Как оформить и отправить заказ</em>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>,
+        modalRoot
+      )}
+
       {modalRoot && infoOpen && createPortal(
         <div
           className="cart-sheet-backdrop centered-backdrop"
@@ -762,7 +962,6 @@ export default function Cart() {
           >
             <div className="sheet-header">
               <div>
-                <div className="sheet-badge">Информация</div>
                 <h2>Как оформить заказ</h2>
               </div>
 
@@ -804,7 +1003,6 @@ export default function Cart() {
           >
             <div className="sheet-header">
               <div>
-                <div className="sheet-badge">История</div>
                 <h2>История заказов</h2>
                 <p className="sheet-description">
                   Здесь хранятся последние сформированные заказы. Их можно снова скачать, отправить или удалить.

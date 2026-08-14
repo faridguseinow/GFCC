@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useCart } from "../../context/CartContext";
+import { usePriceSource } from "../../context/PriceSourceContext";
 import { usePriceTier } from "../../context/PriceTierContext";
 import { useToast } from "../../context/ToastContext";
 import { resolvePriceByTier } from "../../utils/priceTier";
@@ -29,8 +30,12 @@ const buildFallbackId = (item) => {
   return `${safeCategory}-${safeName}-${safePrice}`;
 };
 
-const buildCartProduct = (item, priceTier) => ({
-  id: toText(item?.id) || buildFallbackId(item),
+const buildCartItemId = (item, priceBase) =>
+  `${priceBase}:${toText(item?.id) || buildFallbackId(item)}`;
+
+const buildCartProduct = (item, priceTier, priceBase) => ({
+  id: buildCartItemId(item, priceBase),
+  sourceId: toText(item?.id) || buildFallbackId(item),
   name: toText(item?.name) || "Товар",
   price: resolvePriceByTier(item, priceTier) ?? 0,
   legacyPrice: resolvePriceByTier(item, priceTier) ?? 0,
@@ -38,6 +43,7 @@ const buildCartProduct = (item, priceTier) => ({
   extraPrice: Number.isFinite(Number(item?.extraPrice)) ? Number(item.extraPrice) : null,
   retailPrice: Number.isFinite(Number(item?.retailPrice)) ? Number(item.retailPrice) : null,
   addedAtPriceTier: priceTier,
+  priceBase,
   quantity: 1
 });
 
@@ -50,6 +56,7 @@ export default function PriceList({
 
   /* ✅ Хук внутри компонента */
   const { activeOrder, addToCart, removeItem, setQuantity } = useCart();
+  const { priceBase } = usePriceSource();
   const { priceTier } = usePriceTier();
   const { showToast } = useToast();
 
@@ -87,7 +94,7 @@ export default function PriceList({
 
         <tbody>
           {sorted.map((item, idx) => {
-            const itemId = toText(item?.id) || buildFallbackId(item);
+            const itemId = buildCartItemId(item, priceBase);
             const isSelected = activeOrder.some((cartItem) => cartItem.id === itemId);
 
             return (
@@ -102,7 +109,7 @@ export default function PriceList({
                     const previousItem = activeOrder.find((cartItem) => cartItem.id === itemId);
                     const previousQuantity = previousItem ? Number(previousItem.quantity || 1) : 0;
 
-                    addToCart(buildCartProduct(item, priceTier));
+                    addToCart(buildCartProduct(item, priceTier, priceBase));
                     showToast("Добавлено в корзину", {
                       actionLabel: "Отмена",
                       duration: 4200,

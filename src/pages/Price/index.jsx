@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { Settings } from "lucide-react";
 import PriceList from "../../components/PriceList";
+import PriceStatus from "../../components/PriceStatus";
 import NavListItem from "../../components/NavListItem";
 import PriceTierSelector from "../../components/PriceTierSelector";
+import { usePriceSource } from "../../context/PriceSourceContext";
 import { usePriceTier } from "../../context/PriceTierContext";
 import * as XLSX from "xlsx";
 import "./style.scss";
@@ -12,8 +15,12 @@ import {
   DEFAULT_CATEGORY_ICON
 } from "../../config/priceCategories";
 import {
+  getPriceBaseExcelTitle,
+  getPriceBaseLabel,
+  getPricesApiUrl
+} from "../../utils/priceBase";
+import {
   getPriceTierExcelTitle,
-  getPriceTierSubtitle,
   resolvePriceByTier
 } from "../../utils/priceTier";
 
@@ -31,10 +38,12 @@ export default function Price() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const selectedCategory = searchParams.get("category");
+  const { priceBase } = usePriceSource();
   const { priceTier } = usePriceTier();
 
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [priceTierSelectorOpen, setPriceTierSelectorOpen] = useState(false);
 
@@ -63,7 +72,7 @@ export default function Price() {
     const today = new Date().toLocaleDateString('ru-RU');
 
     XLSX.utils.sheet_add_aoa(worksheet, [
-      ["ПРАЙС ЛИСТ GFCC"],
+      [`ПРАЙС ЛИСТ ${getPriceBaseExcelTitle(priceBase)}`],
       [`${getPriceTierExcelTitle(priceTier)} НА ${today}`],
       [],
       ["КАТЕГОРИЯ", "НАИМЕНОВАНИЕ", "ЦЕНА"]
@@ -90,7 +99,7 @@ export default function Price() {
 
     XLSX.utils.book_append_sheet(workbook, worksheet, "ПРАЙС");
 
-    XLSX.writeFile(workbook, `GFCC_${priceTier}_prices_${today}.xlsx`);
+    XLSX.writeFile(workbook, `GFCC_${priceBase}_${priceTier}_prices_${today}.xlsx`);
   };
 
 
@@ -105,16 +114,40 @@ export default function Price() {
 
   /* FETCH */
   useEffect(() => {
-    fetch("https://gfcc-price-api-server.onrender.com/api/prices")
-      .then(res => res.json())
+    const controller = new AbortController();
+
+    setLoading(true);
+    setLoadError("");
+
+    fetch(getPricesApiUrl(priceBase), { signal: controller.signal })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error("Не удалось загрузить прайс");
+        }
+
+        return res.json();
+      })
       .then(json => {
         const cleaned = Array.isArray(json)
           ? json.filter(i => i.name && i.category)
           : [];
         setData(cleaned);
         setLoading(false);
+      })
+      .catch((error) => {
+        if (error?.name === "AbortError") {
+          return;
+        }
+
+        setData([]);
+        setLoadError("Не удалось загрузить прайс. Проверьте API-сервер.");
+        setLoading(false);
       });
-  }, []);
+
+    return () => {
+      controller.abort();
+    };
+  }, [priceBase]);
 
   /* SCROLL RESET */
   useEffect(() => {
@@ -122,7 +155,7 @@ export default function Price() {
   }, [selectedCategory]);
 
   if (loading) {
-    return <p className="price-loading">Загрузка свежего прайса...</p>;
+    return <p className="price-loading">Загрузка прайса...</p>;
   }
 
   /* CATEGORY MAP */
@@ -150,42 +183,29 @@ export default function Price() {
 
       {/* HEADER всегда один */}
       <div className={`sticky-header ${!selectedCategory ? "main-header" : ""}`}>
-        <div className={showProducts ? "header-row" : "categories-header"}>
+        <div className={showProducts ? "products-header" : "categories-header"}>
 
           {showProducts ? (
             <>
-              <button
-                className="price-back-btn"
-                onClick={() => {
-                  setSearchTerm("");
-                  navigate("/price");
-                }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-                  <path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z" />
-                </svg>
-              </button>
+              <div className="header-row">
+                <button
+                  className="price-back-btn"
+                  onClick={() => {
+                    setSearchTerm("");
+                    navigate("/price");
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                    <path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z" />
+                  </svg>
+                </button>
 
-              <input
-                className="price-search"
-                placeholder="Поиск товара..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-
-              <button
-                type="button"
-                className="price-settings-btn"
-                onClick={() => setPriceTierSelectorOpen(true)}
-                aria-label="Выбрать тип цены"
-              >
-                <span className="price-settings-glyph" aria-hidden="true">₽</span>
-              </button>
-            </>
-          ) : (
-            <>
-              <div className="title-row">
-                <h2>Прайс-лист Gold и Oasis</h2>
+                <input
+                  className="price-search"
+                  placeholder="Поиск товара..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
 
                 <button
                   type="button"
@@ -193,11 +213,28 @@ export default function Price() {
                   onClick={() => setPriceTierSelectorOpen(true)}
                   aria-label="Выбрать тип цены"
                 >
-                  <span className="price-settings-glyph" aria-hidden="true">₽</span>
+                  <Settings size={20} strokeWidth={2.2} aria-hidden="true" />
                 </button>
               </div>
+            </>
+          ) : (
+            <>
+              <div className="title-row">
+                <h2>
+                  Прайс-лист
+                  <span>{getPriceBaseLabel(priceBase)}</span>
+                  <PriceStatus />
+                </h2>
 
-              <p>{getPriceTierSubtitle(priceTier)}</p>
+                <button
+                  type="button"
+                  className="price-settings-btn"
+                  onClick={() => setPriceTierSelectorOpen(true)}
+                  aria-label="Выбрать тип цены"
+                >
+                  <Settings size={20} strokeWidth={2.2} aria-hidden="true" />
+                </button>
+              </div>
 
               <div className="header-controls">
                 <input
@@ -212,7 +249,7 @@ export default function Price() {
                     className="export-btn"
                     onClick={handleExport}
                   >
-                    Скачать прайс лист Excel
+                    Скачать Excel
                   </button>
                 )}
               </div>
@@ -226,7 +263,11 @@ export default function Price() {
 
       <div className="price-scroll-container">
 
-        {showProducts || searchTerm.trim() !== "" ? (
+        {loadError ? (
+          <div className="price-empty-state">
+            {loadError}
+          </div>
+        ) : showProducts || searchTerm.trim() !== "" ? (
           <PriceList
             data={data}
             selectedCategory={
@@ -235,7 +276,7 @@ export default function Price() {
             searchTerm={searchTerm}
             fontSize={14}
           />
-        ) : (
+        ) : categories.length > 0 ? (
           categories.map((cat) => {
             const Icon =
               priceCategoriesConfig.find(c => c.key === cat.key)?.icon
@@ -251,6 +292,10 @@ export default function Price() {
               />
             );
           })
+        ) : (
+          <div className="price-empty-state">
+            В выбранной базе нет товаров.
+          </div>
         )}
 
       </div>

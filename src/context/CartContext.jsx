@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types, react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from "react";
+import { normalizePriceBase, PRICE_BASES } from "../utils/priceBase";
 import { normalizePriceTier, PRICE_TIERS } from "../utils/priceTier";
 
 const CartContext = createContext();
@@ -52,6 +53,7 @@ const buildFallbackId = (item, index = 0) => {
 
 const normalizeCartItem = (item, index = 0) => ({
     id: toText(item?.id) || buildFallbackId(item, index),
+    sourceId: toText(item?.sourceId) || toText(item?.id) || buildFallbackId(item, index),
     name: toText(item?.name) || "Товар",
     price: resolveLegacyPrice(item),
     legacyPrice: resolveLegacyPrice(item),
@@ -59,6 +61,7 @@ const normalizeCartItem = (item, index = 0) => ({
     extraPrice: normalizeOptionalPrice(item?.extraPrice ?? item?.price),
     retailPrice: normalizeOptionalPrice(item?.retailPrice),
     addedAtPriceTier: normalizePriceTier(item?.addedAtPriceTier || PRICE_TIERS.EXTRA),
+    priceBase: normalizePriceBase(item?.priceBase || item?.addedAtPriceBase || PRICE_BASES.GOLD),
     quantity: normalizeQuantity(item?.quantity)
 });
 

@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react';
 import { AliveScope, KeepAlive } from 'react-activation';
 
 import { CartProvider } from "./context/CartContext";
+import { PriceSourceProvider } from "./context/PriceSourceContext";
 import { PriceTierProvider } from "./context/PriceTierContext";
 import { ToastProvider } from "./context/ToastContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -23,6 +24,7 @@ import './reset.css';
 
 import WelcomeScreen from './components/WelcomeScreen'
 import PWAInstallBanner from './components/PWAInstallBanner'
+import PullToRefresh from './components/PullToRefresh';
 
 import Home from './pages/Home';
 import ProductPage from './pages/ProductPage';
@@ -137,8 +139,9 @@ function App() {
     <ThemeProvider>
       <div className="app-container">
         <PriceTierProvider>
-          <CartProvider>
-            <ToastProvider>
+          <PriceSourceProvider>
+            <CartProvider>
+              <ToastProvider>
 
               {welcomeVisible ? (
                 <WelcomeScreen
@@ -195,11 +198,13 @@ function App() {
                   </div>
 
                   {!keyboardOpen && <Footer />}
+                  <PullToRefresh />
                 </>
               )}
 
-            </ToastProvider>
-          </CartProvider>
+              </ToastProvider>
+            </CartProvider>
+          </PriceSourceProvider>
         </PriceTierProvider>
       </div>
     </ThemeProvider>

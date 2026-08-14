@@ -1,5 +1,17 @@
 Options -MultiViews
 
+<IfModule mod_headers.c>
+  <FilesMatch "^(index\.html|sw\.js|manifest\.json|version\.json|_redirects)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+
+  <FilesMatch "\.(js|css|png|jpg|jpeg|webp|svg|ico|woff2?)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /

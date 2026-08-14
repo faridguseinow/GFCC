@@ -1,13 +1,14 @@
 import { usePriceStatus } from '../../usePriceStatus';
+import './style.scss';
 
 export default function PriceStatus() {
-  const isStale = usePriceStatus();
+  const updatedAtText = usePriceStatus();
 
-  if (!isStale) return null;
+  if (!updatedAtText) return null;
 
   return (
-    <div className="stale-warning">
-      ⚠ Чтобы получить свежий прайс — подключитесь к интернету
+    <div className="price-status">
+      Обновлено: {updatedAtText}
     </div>
   );
 }
