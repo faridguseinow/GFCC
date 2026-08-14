@@ -34,3 +34,4 @@ gfcc-release-key/
 *.p12
 *.mobileprovision
 android/app/google-services.json
+.vercel
