@@ -13,7 +13,7 @@ import {
   getPlantsCatalogue
 } from "../../data/api";
 
-const APP_VERSION = "1.5.2";
+const APP_VERSION = "1.5.3";
 const LAUNCH_NOTICE_STORAGE_KEY = "launchNoticeDismissedVersion";
 
 const SECTION_DEFINITIONS = [

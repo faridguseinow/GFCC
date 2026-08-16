@@ -1,4 +1,4 @@
-self.GFCC_SW_VERSION = "1.5.2-boot-reload";
+self.GFCC_SW_VERSION = "1.5.3-boot-reload";
 
 self.addEventListener("install", () => {
   self.skipWaiting();
