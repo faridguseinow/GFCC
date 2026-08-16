@@ -4,7 +4,7 @@ import './index.css';
 import App from './App';
 
 let bootReloading = false;
-const BOOT_RELOAD_VERSION = "1.5.1";
+const BOOT_RELOAD_VERSION = "1.5.2";
 const BOOT_RELOAD_PARAM = "gfcc_boot";
 const BOOT_RELOAD_KEY = `gfcc_boot_reload_${BOOT_RELOAD_VERSION}`;
 

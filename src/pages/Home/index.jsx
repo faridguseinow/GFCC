@@ -13,6 +13,9 @@ import {
   getPlantsCatalogue
 } from "../../data/api";
 
+const APP_VERSION = "1.5.2";
+const LAUNCH_NOTICE_STORAGE_KEY = "launchNoticeDismissedVersion";
+
 const SECTION_DEFINITIONS = [
   {
     id: "flowers",
@@ -93,8 +96,8 @@ export default function Home() {
   );
 
   useEffect(() => {
-    const dismissed = localStorage.getItem("launchNoticeDismissed");
-    if (!dismissed) {
+    const dismissedVersion = localStorage.getItem(LAUNCH_NOTICE_STORAGE_KEY);
+    if (dismissedVersion !== APP_VERSION) {
       setShowNotice(true);
     }
   }, []);
@@ -248,7 +251,7 @@ export default function Home() {
   );
 
   const closeNotice = () => {
-    localStorage.setItem("launchNoticeDismissed", "true");
+    localStorage.setItem(LAUNCH_NOTICE_STORAGE_KEY, APP_VERSION);
     setShowNotice(false);
   };
 
@@ -258,7 +261,10 @@ export default function Home() {
       {showNotice && (
         <div className="launch-notice glass">
           <div className="notice-content">
-            <ul>GFCC — Версия 1.5.1</ul>
+            <ul>GFCC — Версия {APP_VERSION}</ul>
+            <li>
+              Серверы теперь находятся в России, поэтому прайс-листы в приложении работают без VPN.
+            </li>
             <li>
               Добавлен прайс-лист цветочного склада Oasis Flowers как отдельный прайс-лист. Его можно выбрать в настройках прайс-листа.
             </li>

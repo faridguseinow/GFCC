@@ -4,13 +4,19 @@ const CATALOGUE_SHEET_URL = "https://script.google.com/macros/s/AKfycbz0lsVChjzW
 const CATALOGUE_SHEET_PROXY_URL = `https://corsproxy.io/?${encodeURIComponent(CATALOGUE_SHEET_URL)}`;
 const CATALOGUE_CACHE_KEY = "gfcc_catalogue_sheet_cache_v4";
 
-const DEFAULT_CLIENTS_API_BASE_URL = "https://clients-gf-oas-api.onrender.com";
-const CLIENTS_API_BASE_URL = (
-  import.meta.env.VITE_CLIENTS_API_BASE_URL || DEFAULT_CLIENTS_API_BASE_URL
-).replace(/\/+$/, "");
-const CLIENT_LOOKUP_URL = (code) =>
-  `${CLIENTS_API_BASE_URL}/client-by-code?code=${encodeURIComponent(code)}`;
-const CLIENTS_INDEX_URL = `${CLIENTS_API_BASE_URL}/clients-index`;
+const DEFAULT_CLIENT_LOOKUP_API_URL = "https://api.gfcc-oasis.ru/client-by-code/";
+const CLIENT_LOOKUP_API_URL = (
+  import.meta.env.VITE_CLIENT_LOOKUP_API_URL || DEFAULT_CLIENT_LOOKUP_API_URL
+);
+const CLIENTS_INDEX_URL = (
+  import.meta.env.VITE_CLIENTS_INDEX_URL || ""
+).trim();
+const CLIENT_LOOKUP_URL = (code) => {
+  const url = new URL(CLIENT_LOOKUP_API_URL);
+  url.searchParams.set("code", code);
+
+  return url.toString();
+};
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 15000;
@@ -536,6 +542,10 @@ const loadClientsIndex = async () => {
   if (isFreshClientsIndex(localCache)) {
     memoryClientsIndexCache = localCache;
     return localCache.index;
+  }
+
+  if (!CLIENTS_INDEX_URL) {
+    throw new Error("Clients index API is not configured");
   }
 
   if (clientsIndexPromise) {
