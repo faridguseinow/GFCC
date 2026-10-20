@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Info } from "lucide-react";
 import Barcode from "react-barcode";
-import { getClientsByCode } from "../../data/api";
+import { getClientsByCode, registerCardConnection } from "../../data/api";
 import GoldenLogo from "../../assets/icons/logo_sm_gfcc.png";
 import OasisLogo from "../../assets/icons/logo_sm_oasis.png";
 import "./style.scss";
@@ -15,6 +15,14 @@ const toText = (value) => (value === null || value === undefined ? "" : String(v
 const normalizeCode = (code) => toText(code).padStart(6, "0");
 
 const normalizeWarehouseKey = (warehouse) => toText(warehouse).toLowerCase();
+
+const resolveConnectionSource = (warehouse) => {
+  const normalizedWarehouse = normalizeWarehouseKey(warehouse);
+
+  if (normalizedWarehouse.includes("golden")) return "golden";
+  if (normalizedWarehouse.includes("oasis")) return "oasis";
+  return null;
+};
 
 const clearSavedClientSelection = () => {
   localStorage.removeItem(STORAGE_KEY);
@@ -198,6 +206,13 @@ const ClientQR = () => {
     setActiveWarehouseKey("");
     setShowActivationNoticeAfterSelection(false);
     writeSavedClientSelection(normalizedCode, selectedClient);
+
+    const source = resolveConnectionSource(selectedClient?.sklad);
+    if (source) {
+      registerCardConnection(normalizedCode, source).catch(() => {
+        // Statistics must never block the existing client-card flow.
+      });
+    }
 
     if (showActivationNotice) {
       setActivationNoticeOpen(true);

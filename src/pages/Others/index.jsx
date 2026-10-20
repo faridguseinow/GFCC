@@ -4,6 +4,7 @@ import {
   CircleHelp,
   Code2,
   FileText,
+  Info,
   LifeBuoy,
   ShieldCheck,
   Warehouse
@@ -12,7 +13,7 @@ import { useTheme } from "../../context/ThemeContext";
 import NavListItem from "../../components/NavListItem";
 import "./style.scss";
 
-const APP_VERSION = "1.5.3";
+const APP_VERSION = "1.6.0";
 const SUPPORT_TELEGRAM_URL = "https://t.me/+79663028881";
 
 export default function Others() {
@@ -187,6 +188,17 @@ export default function Others() {
           icon={<Code2 size={20} strokeWidth={2.1} />}
           title="Связь с разработчиком"
           onClick={() => window.open("https://t.me/faridguseinow", "_blank", "noopener,noreferrer")}
+        />
+      </div>
+
+      {/* ABOUT */}
+      <div className="section">
+        <div className="section-title">Приложение</div>
+        <NavListItem
+          icon={<Info size={20} strokeWidth={2.1} />}
+          title="О приложении"
+          subtitle="Возможности, сайты и админ-панель"
+          to="/others/about"
         />
       </div>
 

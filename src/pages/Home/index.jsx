@@ -13,7 +13,7 @@ import {
   getPlantsCatalogue
 } from "../../data/api";
 
-const APP_VERSION = "1.5.3";
+const APP_VERSION = "1.6.0";
 const LAUNCH_NOTICE_STORAGE_KEY = "launchNoticeDismissedVersion";
 
 const SECTION_DEFINITIONS = [
@@ -270,6 +270,12 @@ export default function Home() {
             </li>
             <li>
               Оптовая цена и функция корзины доступны зарегистрированным клиентам Golden Flowers и Oasis Flowers с активной картой клиента.
+            </li>
+            <li>
+              В профиле появился раздел «О приложении» со ссылками компаний и входом в обновлённую админ-панель.
+            </li>
+            <li>
+              Добавлена анонимная статистика посещений по Web, PWA, APK, RuStore и Telegram.
             </li>
             <li>
               Исправлены ошибки. Улучшена стабильность, безопасность и оптимизирована работа приложения.

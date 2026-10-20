@@ -8,6 +8,9 @@ const DEFAULT_CLIENT_LOOKUP_API_URL = "https://api.gfcc-oasis.ru/client-by-code/
 const CLIENT_LOOKUP_API_URL = (
   import.meta.env.VITE_CLIENT_LOOKUP_API_URL || DEFAULT_CLIENT_LOOKUP_API_URL
 );
+const CARD_CONNECTIONS_API_URL = (
+  import.meta.env.VITE_CARD_CONNECTIONS_API_URL || "https://api.gfcc-oasis.ru/card-connections/"
+).trim();
 const CLIENTS_INDEX_URL = (
   import.meta.env.VITE_CLIENTS_INDEX_URL || ""
 ).trim();
@@ -725,6 +728,46 @@ export async function getClientsByCode(code) {
     console.error("Client lookup API error:", directLookupError);
     throw directLookupError;
   }
+}
+
+export async function registerCardConnection(code, source) {
+  const normalizedCode = toText(code);
+  const normalizedSource = toText(source).toLowerCase();
+
+  if (!/^\d{6}$/.test(normalizedCode) || !["golden", "oasis"].includes(normalizedSource)) {
+    return false;
+  }
+
+  const body = { code: normalizedCode, source: normalizedSource };
+
+  if (isNativePlatform()) {
+    const response = await CapacitorHttp.post({
+      url: CARD_CONNECTIONS_API_URL,
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      data: body,
+      connectTimeout: CLIENT_LOOKUP_TIMEOUT_MS,
+      readTimeout: CLIENT_LOOKUP_TIMEOUT_MS
+    });
+
+    if (response.status < 200 || response.status >= 300) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    return true;
+  }
+
+  const response = await fetch(CARD_CONNECTIONS_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(body),
+    credentials: "same-origin"
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+
+  return true;
 }
 
 const matchesPreferredClient = (client, preferredSelection) => {

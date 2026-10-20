@@ -15,7 +15,7 @@ import { AliveScope, KeepAlive } from 'react-activation';
 
 import { CartProvider } from "./context/CartContext";
 import { PriceSourceProvider } from "./context/PriceSourceContext";
-import { PriceTierProvider } from "./context/PriceTierContext";
+import { PriceTierProvider, usePriceTier } from "./context/PriceTierContext";
 import { ToastProvider } from "./context/ToastContext";
 import { ThemeProvider } from "./context/ThemeContext";
 
@@ -25,6 +25,7 @@ import './reset.css';
 import WelcomeScreen from './components/WelcomeScreen'
 import PWAInstallBanner from './components/PWAInstallBanner'
 import PullToRefresh from './components/PullToRefresh';
+import AppVisitReporter from './components/AppVisitReporter';
 
 import Home from './pages/Home';
 import ProductPage from './pages/ProductPage';
@@ -39,6 +40,7 @@ import Others from './pages/Others';
 import ConverterPage from './pages/Others/ConverterPage';
 import FAQPage from './pages/Others/FAQPage';
 import WarehousePage from './pages/Others/WarehousePage';
+import About from './pages/Others/About';
 
 import Footer from './layouts/Footer';
 
@@ -55,6 +57,20 @@ function ScrollHandler() {
       window.scrollTo(0, 0);
     }
   }, [location.pathname]);
+
+  return null;
+}
+
+function ClientCartRoute() {
+  const { hasClientCard } = usePriceTier();
+
+  return hasClientCard ? <Cart /> : <Navigate to="/price" replace />;
+}
+
+function AdminRedirect() {
+  useEffect(() => {
+    window.location.replace('https://gfcc-oasis.ru/admin/login.php');
+  }, []);
 
   return null;
 }
@@ -139,6 +155,7 @@ function App() {
     <ThemeProvider>
       <div className="app-container">
         <PriceTierProvider>
+          <AppVisitReporter />
           <PriceSourceProvider>
             <CartProvider>
               <ToastProvider>
@@ -185,19 +202,21 @@ function App() {
                             </KeepAlive>
                           }
                         />
-                        <Route path="/cart" element={<Cart />} />
+                        <Route path="/cart" element={<ClientCartRoute />} />
                         <Route path="/others" element={<Others />} />
                         <Route path="/others/converter" element={<ConverterPage />} />
                         <Route path="/others/warehouse" element={<WarehousePage />} />
                         <Route path="/others/faq" element={<FAQPage />} />
+                        <Route path="/others/about" element={<About />} />
                         <Route path="/others/privacy" element={<Privacy />} />
                         <Route path="/others/terms" element={<Terms />} />
+                        <Route path="/admin" element={<AdminRedirect />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                       </Routes>
                     </AliveScope>
                   </div>
 
-                  {!keyboardOpen && <Footer />}
+                  {!keyboardOpen && location.pathname !== "/admin" && <Footer />}
                   <PullToRefresh />
                 </>
               )}

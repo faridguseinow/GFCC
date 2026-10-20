@@ -57,7 +57,7 @@ export default function PriceList({
   /* ✅ Хук внутри компонента */
   const { activeOrder, addToCart, removeItem, setQuantity } = useCart();
   const { priceBase } = usePriceSource();
-  const { priceTier } = usePriceTier();
+  const { priceTier, hasClientCard } = usePriceTier();
   const { showToast } = useToast();
 
   const filtered = data.filter((item) => {
@@ -88,7 +88,7 @@ export default function PriceList({
           <tr>
             <th>Наименование</th>
             <th>Цена</th>
-            <th></th>
+            {hasClientCard && <th></th>}
           </tr>
         </thead>
 
@@ -102,7 +102,7 @@ export default function PriceList({
               <td>{item.name?.toUpperCase()}</td>
               <td>{format(resolvePriceByTier(item, priceTier))}</td>
 
-              <td>
+              {hasClientCard && <td>
                 <button
                   className={`add-btn ${isSelected ? "selected-btn" : ""}`}
                   onClick={() => {
@@ -126,7 +126,7 @@ export default function PriceList({
                 >
                   +
                 </button>
-              </td>
+              </td>}
 
             </tr>
             );

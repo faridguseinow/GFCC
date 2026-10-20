@@ -1,0 +1,83 @@
+.about-page {
+  min-height: 100vh;
+  padding: var(--header-top-space) var(--page-side-padding) var(--page-bottom-space);
+}
+
+.about-document {
+  width: min(100%, 760px);
+  margin: 0 auto;
+}
+
+.about-header {
+  padding-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+
+  h1 {
+    margin: 0;
+    font-size: 26px;
+  }
+
+  p {
+    margin-top: 4px;
+    color: color-mix(in srgb, var(--text) 56%, transparent);
+    font-size: 13px;
+  }
+}
+
+.about-back {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.about-content {
+  padding: 24px 2px 8px;
+
+  h2 {
+    margin: 28px 0 10px;
+    color: var(--text);
+    font-size: 17px;
+  }
+
+  p {
+    margin: 0 0 14px;
+    color: color-mix(in srgb, var(--text) 74%, transparent);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--text) 32%, transparent);
+    text-underline-offset: 3px;
+  }
+}
+
+.about-sites {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.about-footer {
+  margin-top: 28px;
+  padding: 20px 2px 8px;
+  border-top: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+  text-align: center;
+
+  a {
+    color: color-mix(in srgb, var(--text) 40%, transparent);
+    font-size: 12px;
+    text-decoration: none;
+  }
+}

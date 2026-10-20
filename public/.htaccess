@@ -17,6 +17,9 @@ Options -MultiViews
   RewriteBase /
 
   RewriteRule ^index\.html$ - [L]
+  RewriteRule ^api/admin/card-connections/?$ api/admin-card-connections.php [END,QSA]
+  RewriteRule ^admin/login/?$ admin/login.php [END,QSA]
+  RewriteRule ^admin/logout/?$ admin/logout.php [END,QSA]
 
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
