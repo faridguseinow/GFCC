@@ -46,7 +46,7 @@ $csrfToken = gfcc_csrf_token();
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Вход — GFCC Oasis</title>
   <script>try{const a=localStorage.getItem('gfcc_admin_theme'),t=localStorage.getItem('theme');document.documentElement.dataset.theme=a||(t==='dark-theme'?'dark':'light')}catch(e){}</script>
-  <link rel="stylesheet" href="/admin/style.css?v=1.6.0">
+  <link rel="stylesheet" href="/admin/style.css?v=1.6.1">
 </head>
 <body class="login-page">
   <button class="theme-button login-theme" type="button" data-theme-toggle aria-label="Переключить тему">◐</button>
@@ -70,6 +70,6 @@ $csrfToken = gfcc_csrf_token();
     </form>
     <small class="login-note">Доступ разрешён только администратору приложения.</small>
   </main>
-  <script src="/admin/theme.js?v=1.6.0" defer></script>
+  <script src="/admin/theme.js?v=1.6.1" defer></script>
 </body>
 </html>

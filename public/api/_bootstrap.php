@@ -73,6 +73,8 @@ function gfcc_env(string $name, ?string $default = null): ?string
         'GFCC_DB_PASSWORD' => 'db_password',
         'GFCC_ADMIN_PASSWORD_HASH' => 'admin_password_hash',
         'GFCC_CLIENT_LOOKUP_API_URL' => 'client_lookup_api_url',
+        'GFCC_CLIENT_INDEX_FILE' => 'client_index_file',
+        'GFCC_ANALYTICS_SALT' => 'analytics_salt',
     ];
     $configKey = $configKeys[$name] ?? null;
     $configValue = $configKey !== null ? ($privateConfig[$configKey] ?? null) : null;

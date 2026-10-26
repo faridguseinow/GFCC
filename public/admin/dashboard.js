@@ -56,9 +56,9 @@
     const errorNode = document.getElementById('dashboard-error');
 
     try {
-      const response = await fetch('/api/admin-dashboard.php', {
+      const response = await fetch('https://gfcc-oasis.ru/api/admin-dashboard.php', {
         headers: { Accept: 'application/json' },
-        credentials: 'same-origin',
+        credentials: 'include',
         cache: 'no-store'
       });
 

@@ -13,7 +13,7 @@ import { useTheme } from "../../context/ThemeContext";
 import NavListItem from "../../components/NavListItem";
 import "./style.scss";
 
-const APP_VERSION = "1.6.0";
+const APP_VERSION = "1.6.1";
 const SUPPORT_TELEGRAM_URL = "https://t.me/+79663028881";
 
 export default function Others() {

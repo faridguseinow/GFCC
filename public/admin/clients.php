@@ -21,7 +21,7 @@ $csrfToken = gfcc_csrf_token();
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Подключённые клиенты — GFCC Oasis</title>
   <script>try{const a=localStorage.getItem('gfcc_admin_theme'),t=localStorage.getItem('theme');document.documentElement.dataset.theme=a||(t==='dark-theme'?'dark':'light')}catch(e){}</script>
-  <link rel="stylesheet" href="/admin/style.css?v=1.6.0">
+  <link rel="stylesheet" href="/admin/style.css?v=1.6.1">
 </head>
 <body>
   <main class="admin-shell">
@@ -61,7 +61,7 @@ $csrfToken = gfcc_csrf_token();
       </div>
     </section>
   </main>
-  <script src="/admin/theme.js?v=1.6.0" defer></script>
-  <script src="/admin/clients.js?v=1.6.0" defer></script>
+  <script src="/admin/theme.js?v=1.6.1" defer></script>
+  <script src="/admin/clients.js?v=1.6.1" defer></script>
 </body>
 </html>

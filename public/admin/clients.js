@@ -12,6 +12,7 @@
   const pageLabel = document.getElementById('page-label');
   const prevButton = document.getElementById('prev-page');
   const nextButton = document.getElementById('next-page');
+  const apiBase = 'https://gfcc-oasis.ru/api/admin-card-connections.php';
 
   const showState = (state) => {
     loadingNode.hidden = state !== 'loading';
@@ -24,9 +25,11 @@
     tableBody.replaceChildren();
     clients.forEach((client) => {
       const row = document.createElement('tr');
-      const connectedAt = client.connectedAt
-        ? new Date(client.connectedAt).toLocaleDateString('ru-RU')
-        : '—';
+      const rawDate = String(client.connectedAt || '').trim();
+      const date = rawDate ? new Date(rawDate.replace(' ', 'T')) : null;
+      const connectedAt = date && !Number.isNaN(date.getTime())
+        ? date.toLocaleDateString('ru-RU')
+        : rawDate || '—';
       [client.code, client.name, client.source, connectedAt].forEach((value) => {
         const cell = document.createElement('td');
         cell.textContent = String(value || '—');
@@ -41,12 +44,17 @@
     if (!silent) showState('loading');
 
     try {
-      const response = await fetch(`/api/admin-card-connections.php?page=${page}&limit=${pageSize}`, {
-        headers: { Accept: 'application/json' }, credentials: 'same-origin', cache: 'no-store'
+      const requestUrl = `${apiBase}?page=${encodeURIComponent(page)}&limit=${pageSize}`;
+      const response = await fetch(requestUrl, {
+        headers: { Accept: 'application/json' }, credentials: 'include', cache: 'no-store'
       });
       if (response.status === 401) {
         window.location.replace('/admin/login.php');
         return;
+      }
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error('Сервер вернул некорректный ответ');
       }
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Не удалось загрузить клиентов');

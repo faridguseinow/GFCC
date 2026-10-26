@@ -1,10 +1,10 @@
 import { Capacitor, CapacitorHttp } from "@capacitor/core";
 
-const APP_VERSION = "1.6.0";
+const APP_VERSION = "1.6.1";
 const VISITOR_ID_KEY = "gfcc_anonymous_visitor_id";
 const VISIT_SESSION_KEY = "gfcc_visit_reported";
 const VISITS_API_URL = (
-  import.meta.env.VITE_APP_VISITS_API_URL || "https://api.gfcc-oasis.ru/app-visits/"
+  import.meta.env.VITE_APP_VISITS_API_URL || "https://gfcc-oasis.ru/api/app-visits.php"
 ).trim();
 const DISTRIBUTION_CHANNEL = String(import.meta.env.VITE_DISTRIBUTION_CHANNEL || "").toLowerCase();
 

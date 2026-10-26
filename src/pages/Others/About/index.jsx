@@ -2,7 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import "./style.scss";
 
-const APP_VERSION = "1.6.0";
+const APP_VERSION = "1.6.1";
 
 export default function About() {
   const navigate = useNavigate();

@@ -1,4 +1,4 @@
-self.GFCC_SW_VERSION = "1.6.0-analytics-dashboard";
+self.GFCC_SW_VERSION = "1.6.1-analytics-fix";
 
 self.addEventListener("install", () => {
   self.skipWaiting();

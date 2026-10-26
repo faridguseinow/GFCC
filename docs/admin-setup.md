@@ -18,6 +18,8 @@
    - `GFCC_DB_PASSWORD`
    - `GFCC_ADMIN_PASSWORD_HASH`
    - `GFCC_CLIENT_LOOKUP_API_URL` (необязательно)
+   - `GFCC_CLIENT_INDEX_FILE` (необязательно)
+   - `GFCC_ANALYTICS_SALT` (необязательно, рекомендуется)
 
 3. Создать хеш пароля на сервере с PHP:
 
@@ -32,7 +34,7 @@
 ## Маршруты
 
 - `POST https://api.gfcc-oasis.ru/card-connections/` — серверная проверка и идемпотентная регистрация.
-- `POST https://api.gfcc-oasis.ru/app-visits/` — анонимная регистрация посещения и источника приложения.
+- `POST https://gfcc-oasis.ru/api/app-visits.php` — анонимная регистрация посещения и источника приложения.
 - `GET /api/admin-dashboard.php` — защищённая сводка посещаемости.
 - `GET /api/admin-card-connections.php` — защищённая статистика с пагинацией.
 - `GET /admin/login.php` — вход.
@@ -58,11 +60,7 @@
 /var/www/cl449121/data/www/api.gfcc-oasis.ru/card-connections/index.php
 ```
 
-Файл `server/api.gfcc-oasis.ru/app-visits/index.php` нужно загрузить в:
-
-```text
-/var/www/cl449121/data/www/api.gfcc-oasis.ru/app-visits/index.php
-```
+Endpoint посещений `public/api/app-visits.php` входит в обычную Web-сборку и отдельной загрузки на API-поддомен не требует.
 
 Приватный файл `/var/www/cl449121/data/backend/config/gfcc-statistics.php` должен возвращать массив с ключами `db_host`, `db_port`, `db_name`, `db_user` и `db_password`.
 Необязательный ключ `analytics_salt` позволяет задать отдельную стабильную соль для анонимных идентификаторов посещений; если он не указан, используется пароль БД.

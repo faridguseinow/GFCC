@@ -33,23 +33,50 @@ try {
     $statement->bindValue('offset', $offset, PDO::PARAM_INT);
     $statement->execute();
 
+    $indexFile = gfcc_env(
+        'GFCC_CLIENT_INDEX_FILE',
+        '/var/www/cl449121/data/backend/clients-data/clients-index.json'
+    );
+    $clientIndex = null;
+
+    if ($indexFile && is_file($indexFile)) {
+        $decodedIndex = json_decode(file_get_contents($indexFile) ?: '', true);
+        if (is_array($decodedIndex)) {
+            $clientIndex = $decodedIndex;
+        }
+    }
+
     $clients = [];
     foreach ($statement->fetchAll() as $row) {
         $name = 'Не удалось получить данные';
+        $code = (string) $row['client_code'];
+        $source = (string) $row['client_source'];
 
-        try {
-            $client = gfcc_find_client((string) $row['client_code'], (string) $row['client_source']);
-            if ($client !== null && $client['name'] !== '') {
-                $name = $client['name'];
+        if (is_array($clientIndex)) {
+            foreach (($clientIndex[$code] ?? []) as $client) {
+                $warehouse = (string) ($client['sklad'] ?? $client['warehouse'] ?? '');
+                $clientName = trim((string) ($client['name'] ?? ''));
+
+                if (gfcc_source_from_warehouse($warehouse) === $source && $clientName !== '') {
+                    $name = $clientName;
+                    break;
+                }
             }
-        } catch (Throwable $lookupError) {
-            error_log('GFCC admin client lookup failed: ' . get_class($lookupError));
+        } else {
+            try {
+                $client = gfcc_find_client($code, $source);
+                if ($client !== null && $client['name'] !== '') {
+                    $name = $client['name'];
+                }
+            } catch (Throwable $lookupError) {
+                error_log('GFCC admin client lookup failed: ' . get_class($lookupError));
+            }
         }
 
         $clients[] = [
-            'code' => (string) $row['client_code'],
+            'code' => $code,
             'name' => $name,
-            'source' => ucfirst((string) $row['client_source']),
+            'source' => ucfirst($source),
             'connectedAt' => (string) $row['created_at'],
         ];
     }
